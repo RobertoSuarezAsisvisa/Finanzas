@@ -7,6 +7,9 @@ COPY src/FinanzasMCP.Application/FinanzasMCP.Application.csproj src/FinanzasMCP.
 COPY src/FinanzasMCP.Domain/FinanzasMCP.Domain.csproj src/FinanzasMCP.Domain/
 COPY src/FinanzasMCP.Infrastructure/FinanzasMCP.Infrastructure.csproj src/FinanzasMCP.Infrastructure/
 COPY src/FinanzasMCP.McpServer/FinanzasMCP.McpServer.csproj src/FinanzasMCP.McpServer/
+COPY tests/FinanzasMCP.Application.Tests/FinanzasMCP.Application.Tests.csproj tests/FinanzasMCP.Application.Tests/
+COPY tests/FinanzasMCP.Domain.Tests/FinanzasMCP.Domain.Tests.csproj tests/FinanzasMCP.Domain.Tests/
+COPY tests/FinanzasMCP.Integration.Tests/FinanzasMCP.Integration.Tests.csproj tests/FinanzasMCP.Integration.Tests/
 
 RUN dotnet restore FinanzasMCP.sln
 
