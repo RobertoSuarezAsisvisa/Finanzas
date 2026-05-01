@@ -13,6 +13,7 @@ public sealed class TransactionTagConfiguration : IEntityTypeConfiguration<Trans
         builder.HasOne(x => x.Tag)
             .WithMany(t => t.TransactionTags)
             .HasForeignKey(x => x.TagId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

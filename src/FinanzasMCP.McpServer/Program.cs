@@ -1,11 +1,35 @@
 using FinanzasMCP.Application;
 using FinanzasMCP.Infrastructure;
+using FinanzasMCP.Infrastructure.Persistence;
+using FinanzasMCP.McpServer.Api;
 using FinanzasMCP.McpServer.Tools;
+using Microsoft.EntityFrameworkCore;
 using ModelContextProtocol.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+const string CorsPolicyName = "Frontend";
 
 builder.Configuration.AddUserSecrets<Program>(optional: true);
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? ["http://localhost:4200"];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicyName, policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -30,32 +54,18 @@ builder.Services
     .WithTools<ReportTools>();
 
 var app = builder.Build();
-app.MapMcp("/mcp");
 
-static object CreateAuthorizationServerMetadata(HttpRequest request)
+app.UseMiddleware<ApiExceptionMiddleware>();
+app.UseCors(CorsPolicyName);
+
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var baseUri = $"{request.Scheme}://{request.Host}";
-
-    return new
-    {
-        issuer = baseUri,
-        authorization_endpoint = $"{baseUri}/authorize",
-        token_endpoint = $"{baseUri}/token",
-        registration_endpoint = $"{baseUri}/register",
-        response_types_supported = new[] { "code" },
-        grant_types_supported = new[] { "authorization_code", "refresh_token" },
-        code_challenge_methods_supported = new[] { "S256" }
-    };
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<FinanzasMCPDbContext>();
+    dbContext.Database.Migrate();
 }
 
-app.MapGet("/.well-known/oauth-authorization-server/mcp", (HttpRequest request) =>
-{
-    return Results.Json(CreateAuthorizationServerMetadata(request));
-});
-
-app.MapGet("/.well-known/oauth-authorization-server", (HttpRequest request) =>
-{
-    return Results.Json(CreateAuthorizationServerMetadata(request));
-});
+app.MapMcp("/mcp");
+app.MapFinanzasRestApi();
 
 app.Run();

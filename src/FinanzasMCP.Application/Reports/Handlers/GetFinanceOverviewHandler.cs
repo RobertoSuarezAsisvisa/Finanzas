@@ -17,8 +17,13 @@ public sealed class GetFinanceOverviewHandler(IFinanzasMCPDbContext dbContext)
         var totalExpenses = await dbContext.Set<Transaction>().Where(x => x.Type == TransactionType.Expense).SumAsync(x => x.Amount, cancellationToken);
         var totalAssets = await dbContext.Accounts.SumAsync(x => x.Balance, cancellationToken);
         var totalDebts = await dbContext.Set<Debt>().Where(x => x.Status != DebtStatus.Paid).SumAsync(x => x.RemainingAmount, cancellationToken);
-        var savingGoalsProgress = await dbContext.Set<SavingGoal>().Select(x => x.GoalAmount == 0 ? 0 : (x.CurrentAmount / x.GoalAmount) * 100m).DefaultIfEmpty(0m).AverageAsync(cancellationToken);
-        var purchaseGoalsProgress = await dbContext.Set<PurchaseGoal>().Select(x => x.GoalPrice == 0 ? 0 : (x.SavedAmount / x.GoalPrice) * 100m).DefaultIfEmpty(0m).AverageAsync(cancellationToken);
+        var savingGoalsProgress = await dbContext.Set<SavingGoal>()
+            .Select(x => (decimal?)(x.GoalAmount == 0 ? 0m : (x.CurrentAmount / x.GoalAmount) * 100m))
+            .AverageAsync(cancellationToken) ?? 0m;
+
+        var purchaseGoalsProgress = await dbContext.Set<PurchaseGoal>()
+            .Select(x => (decimal?)(x.GoalPrice == 0 ? 0m : (x.SavedAmount / x.GoalPrice) * 100m))
+            .AverageAsync(cancellationToken) ?? 0m;
 
         return new FinanceOverviewSummary(totalIncome, totalExpenses, totalIncome - totalExpenses, totalAssets, totalDebts, savingGoalsProgress, purchaseGoalsProgress);
     }
