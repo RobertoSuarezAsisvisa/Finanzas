@@ -14,9 +14,8 @@ public sealed class FinanzasMCPDbContextFactory : IDesignTimeDbContextFactory<Fi
             .Build();
 
         var connectionString = configuration["ConnectionStrings:Neon"]
-            ?? configuration["DATABASE_URL"]
-            ?? configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Missing Neon connection string. Set ConnectionStrings:Neon, DATABASE_URL, or ConnectionStrings:DefaultConnection.");
+            ?? configuration.GetConnectionString("Neon")
+            ?? throw new InvalidOperationException("Missing Neon connection string. Set ConnectionStrings:Neon.");
 
         var options = new DbContextOptionsBuilder<FinanzasMCPDbContext>()
             .UseNpgsql(connectionString)

@@ -52,3 +52,4 @@ El proyecto usa Entity Framework Core con migraciones para mantener el esquema d
 
 - El proyecto principal expone herramientas MCP para operar sobre presupuestos, metas de compra y transacciones.
 - Si vas a trabajar con la base de datos, revisa la configuración de `appsettings.json` en `src/FinanzasMCP.McpServer`.
+- La cadena de conexión se lee solo desde `ConnectionStrings:Neon`.

@@ -5,6 +5,8 @@ using ModelContextProtocol.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddUserSecrets<Program>(optional: true);
+
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
