@@ -1,0 +1,50 @@
+# Build outputs
+bin/
+obj/
+out/
+
+# IDEs and editors
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and local runtime files
+*.log
+*.pid
+*.seed
+
+# .NET local secrets
+*.pfx
+*.snk
+secrets.json
+appsettings.Local.json
+appsettings.Development.json
+
+# Environment files
+.env
+.env.*
+
+# Coverage / test artifacts
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Entity Framework migrations cache
+Migrations/*ModelSnapshot.cs.bak
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# Publish artifacts
+publish/
+wwwroot/
