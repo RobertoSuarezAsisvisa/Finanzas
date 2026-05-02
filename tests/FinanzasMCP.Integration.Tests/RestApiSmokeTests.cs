@@ -30,6 +30,22 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task Cors_allows_gcs_frontend_origin()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Options, "/api/v1/health");
+        request.Headers.Add("Origin", "https://storage.googleapis.com");
+        request.Headers.Add("Access-Control-Request-Method", "GET");
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.True(response.Headers.TryGetValues("Access-Control-Allow-Origin", out var origins));
+        Assert.Contains("https://storage.googleapis.com", origins);
+    }
+
+    [Fact]
     public async Task Accounts_and_user_context_flow_works()
     {
         factory.InitializeDatabase();

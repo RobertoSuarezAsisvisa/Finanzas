@@ -18,7 +18,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? ["http://localhost:4200"];
+    .Get<string[]>() ?? ["http://localhost:4200", "https://storage.googleapis.com"];
 
 builder.Services.AddCors(options =>
 {
