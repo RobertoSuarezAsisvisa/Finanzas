@@ -8,7 +8,7 @@ using ModelContextProtocol.AspNetCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-const string CorsPolicyName = "Frontend";
+const string CorsPolicyName = "AllowAnyOrigin";
 
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -16,16 +16,12 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-var allowedOrigins = builder.Configuration
-    .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? ["http://localhost:4200", "https://storage.googleapis.com"];
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(CorsPolicyName, policy =>
     {
         policy
-            .WithOrigins(allowedOrigins)
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
