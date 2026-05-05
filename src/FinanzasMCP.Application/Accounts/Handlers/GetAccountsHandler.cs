@@ -20,6 +20,8 @@ public sealed class GetAccountsHandler(IFinanzasMCPDbContext dbContext)
 
     private static AccountSummary Map(Domain.Accounts.Account account)
     {
+        var cryptoAccount = account.AccountType == Domain.Accounts.AccountType.Crypto ? account.CryptoAccount : null;
+
         return new AccountSummary(
             account.Id,
             account.Name,
@@ -28,10 +30,11 @@ public sealed class GetAccountsHandler(IFinanzasMCPDbContext dbContext)
             account.Balance,
             account.IsActive,
             account.BankName,
+            account.AccountNumber,
             account.Provider,
-            account.CryptoAccount?.Symbol,
-            account.CryptoAccount?.Network,
-            account.CryptoAccount?.Quantity,
-            account.CryptoAccount?.AvgBuyPriceUsd);
+            cryptoAccount?.Symbol,
+            cryptoAccount?.Network,
+            cryptoAccount?.Quantity,
+            cryptoAccount?.AvgBuyPriceUsd);
     }
 }

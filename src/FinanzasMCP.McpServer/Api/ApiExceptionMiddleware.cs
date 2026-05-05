@@ -19,6 +19,10 @@ public sealed class ApiExceptionMiddleware(RequestDelegate next)
         {
             await WriteProblem(context, StatusCodes.Status400BadRequest, "Bad Request", ex.Message, "argument");
         }
+        catch (BadHttpRequestException ex)
+        {
+            await WriteProblem(context, StatusCodes.Status400BadRequest, "Bad Request", ex.Message, "bad-request");
+        }
         catch (Exception ex)
         {
             await WriteProblem(context, StatusCodes.Status500InternalServerError, "Internal Server Error", ex.Message, "unhandled");

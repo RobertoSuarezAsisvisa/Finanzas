@@ -21,7 +21,7 @@ public static class AccountEndpoints
 
         group.MapPut("{id:guid}", async (Guid id, UpdateAccountRequest request, UpdateAccountHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new UpdateAccountCommand(id, request.Name, request.Currency, request.BankName, request.AccountNumber, request.Provider, request.IsActive), ct);
+            var result = await handler.Handle(new UpdateAccountCommand(id, request.Name, request.AccountType, request.Currency, request.Balance, request.BankName, request.AccountNumber, request.Provider, request.CryptoSymbol, request.CryptoNetwork, request.CryptoQuantity, request.CryptoAvgBuyPriceUsd, request.IsActive), ct);
             return Results.Ok(result);
         });
 

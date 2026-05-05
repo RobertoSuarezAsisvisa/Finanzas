@@ -62,6 +62,16 @@ public sealed class SavingGoal : SoftDeletableEntity
         MarkUpdated();
     }
 
+    public void AdjustContribution(decimal delta)
+    {
+        CurrentAmount += delta;
+        if (CurrentAmount < 0m)
+        {
+            CurrentAmount = 0m;
+        }
+        MarkUpdated();
+    }
+
     public void UpdateDetails(string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, SavingGoalStatus? status = null)
     {
         Name = name.Trim();

@@ -24,8 +24,8 @@ public sealed class PurchaseGoalTools(
         => createPurchaseGoalHandler.Handle(new CreatePurchaseGoalCommand(name, targetPrice, description, priority, url, accountId, targetDate), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Adds a contribution to a purchase goal.")]
-    public Task<PurchaseGoalSummary> AddContribution(Guid purchaseGoalId, decimal amount, DateTimeOffset contributionDate, Guid? transactionId = null, CancellationToken cancellationToken = default)
-        => addPurchaseGoalContributionHandler.Handle(new AddPurchaseGoalContributionCommand(purchaseGoalId, amount, contributionDate, transactionId), cancellationToken);
+    public Task<PurchaseGoalSummary> AddContribution(Guid purchaseGoalId, decimal amount, DateTimeOffset contributionDate, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
+        => addPurchaseGoalContributionHandler.Handle(new AddPurchaseGoalContributionCommand(purchaseGoalId, amount, contributionDate, transactionId, accountId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a purchase goal.")]
     public Task<PurchaseGoalSummary> UpdatePurchaseGoal(Guid id, string name, decimal targetPrice, string? description = null, int priority = 1, string? url = null, Guid? accountId = null, DateTimeOffset? targetDate = null, PurchaseGoalStatus? status = null, DateTimeOffset? purchasedAt = null, CancellationToken cancellationToken = default)

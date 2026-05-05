@@ -4,6 +4,7 @@ using FinanzasMCP.Application.Budgets.Queries;
 using FinanzasMCP.Application.Transactions.Commands;
 using FinanzasMCP.Application.Transactions.Handlers;
 using FinanzasMCP.Application.Transactions.Queries;
+using FinanzasMCP.Domain.Transactions;
 
 namespace FinanzasMCP.McpServer.Api;
 
@@ -17,8 +18,8 @@ public static class CashflowEndpoints
 
     private static void MapTransactions(RouteGroupBuilder group)
     {
-        group.MapGet("", async (Guid? accountId, GetTransactionsHandler handler, CancellationToken ct) =>
-            Results.Ok(await handler.Handle(new GetTransactionsQuery(accountId), ct)));
+        group.MapGet("", async (Guid? accountId, TransactionType? type, Guid? categoryId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, int? page, int? pageSize, GetTransactionsHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetTransactionsQuery(accountId, type, categoryId, dateFrom, dateTo, search, page ?? 1, pageSize ?? 10), ct)));
 
         group.MapPost("", async (CreateTransactionRequest request, CreateTransactionHandler handler, CancellationToken ct) =>
         {

@@ -35,8 +35,22 @@ public sealed class AccountTools(
         => getAccountsHandler.Handle(new GetAccountsQuery(), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates an existing account.")]
-    public Task<AccountSummary> UpdateAccount(Guid id, string name, string currency = "USD", string? bankName = null, string? accountNumber = null, string? provider = null, bool isActive = true, CancellationToken cancellationToken = default)
-        => updateAccountHandler.Handle(new UpdateAccountCommand(id, name, currency, bankName, accountNumber, provider, isActive), cancellationToken);
+    public Task<AccountSummary> UpdateAccount(
+        Guid id,
+        string name,
+        AccountType accountType,
+        string currency = "USD",
+        decimal balance = 0m,
+        string? bankName = null,
+        string? accountNumber = null,
+        string? provider = null,
+        string? cryptoSymbol = null,
+        string? cryptoNetwork = null,
+        decimal? cryptoQuantity = null,
+        decimal? cryptoAvgBuyPriceUsd = null,
+        bool isActive = true,
+        CancellationToken cancellationToken = default)
+        => updateAccountHandler.Handle(new UpdateAccountCommand(id, name, accountType, currency, balance, bankName, accountNumber, provider, cryptoSymbol, cryptoNetwork, cryptoQuantity, cryptoAvgBuyPriceUsd, isActive), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Logically deletes an account.")]
     public Task DeleteAccount(Guid id, CancellationToken cancellationToken = default)

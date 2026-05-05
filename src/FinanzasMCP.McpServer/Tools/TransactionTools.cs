@@ -30,9 +30,18 @@ public sealed class TransactionTools(
         CancellationToken cancellationToken = default)
         => createTransactionHandler.Handle(new CreateTransactionCommand(type, amount, currency, accountId, toAccountId, categoryId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
 
-    [McpServerTool, System.ComponentModel.Description("Lists transactions, optionally filtered by account.")]
-    public Task<IReadOnlyList<TransactionSummary>> ListTransactions(Guid? accountId = null, CancellationToken cancellationToken = default)
-        => getTransactionsHandler.Handle(new GetTransactionsQuery(accountId), cancellationToken);
+    [McpServerTool, System.ComponentModel.Description("Lists paged transactions with optional filters.")]
+    public Task<PagedResult<TransactionSummary>> ListTransactions(
+        Guid? accountId = null,
+        TransactionType? type = null,
+        Guid? categoryId = null,
+        DateTimeOffset? dateFrom = null,
+        DateTimeOffset? dateTo = null,
+        string? search = null,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+        => getTransactionsHandler.Handle(new GetTransactionsQuery(accountId, type, categoryId, dateFrom, dateTo, search, page, pageSize), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a transaction and reapplies its balance impact.")]
     public Task<TransactionSummary> UpdateTransaction(

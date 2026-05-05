@@ -12,4 +12,5 @@ public sealed record TransactionSummary(
     Guid? CategoryId,
     string? Description,
     string? Reference,
-    DateTimeOffset TransactionDate);
+    DateTimeOffset TransactionDate,
+    IReadOnlyList<Guid> TagIds);

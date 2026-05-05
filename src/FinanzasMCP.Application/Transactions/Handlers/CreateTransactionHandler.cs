@@ -17,6 +17,11 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
             throw new InvalidOperationException("Amount must be positive.");
         }
 
+        if (command.Type == TransactionType.Transfer && command.ToAccountId is null)
+        {
+            throw new InvalidOperationException("Destination account is required for transfers.");
+        }
+
         var account = await dbContext.Accounts.FirstAsync(x => x.Id == command.AccountId, cancellationToken);
         Account? toAccount = null;
         if (command.ToAccountId is not null)
@@ -51,6 +56,7 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
         }
 
         dbContext.Set<Transaction>().Add(transaction);
+        transaction.ReplaceTags(command.TagIds);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return new TransactionSummary(
@@ -63,6 +69,7 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
             transaction.CategoryId,
             transaction.Description,
             transaction.Reference,
-            transaction.TransactionDate);
+            transaction.TransactionDate,
+            transaction.Tags.Select(tag => tag.TagId).ToArray());
     }
 }

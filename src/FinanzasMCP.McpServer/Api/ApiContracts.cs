@@ -25,10 +25,16 @@ public sealed record CreateAccountRequest(
 
 public sealed record UpdateAccountRequest(
     string Name,
+    AccountType AccountType,
     string Currency,
+    decimal Balance,
     string? BankName,
     string? AccountNumber,
     string? Provider,
+    string? CryptoSymbol,
+    string? CryptoNetwork,
+    decimal? CryptoQuantity,
+    decimal? CryptoAvgBuyPriceUsd,
     bool IsActive);
 
 public sealed record CreateCategoryRequest(string Name, CategoryType Type, string? Icon, Guid? ParentId, bool IsSystem);
@@ -77,13 +83,13 @@ public sealed record UpdateAccountingPeriodRequest(string Name, DateTimeOffset S
 
 public sealed record CreateSavingGoalRequest(string Name, decimal TargetAmount, Guid? AccountId, DateTimeOffset? TargetDate);
 public sealed record UpdateSavingGoalRequest(string Name, decimal TargetAmount, Guid? AccountId, DateTimeOffset? TargetDate, SavingGoalStatus? Status);
-public sealed record AddSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId);
-public sealed record UpdateSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId);
+public sealed record AddSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
+public sealed record UpdateSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 
 public sealed record CreatePurchaseGoalRequest(string Name, decimal TargetPrice, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate);
 public sealed record UpdatePurchaseGoalRequest(string Name, decimal TargetPrice, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate, PurchaseGoalStatus? Status, DateTimeOffset? PurchasedAt);
-public sealed record AddPurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId);
-public sealed record UpdatePurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId);
+public sealed record AddPurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
+public sealed record UpdatePurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 
 public sealed record CreateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, string? Notes);
 public sealed record UpdateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, DebtStatus? Status, string? Notes);

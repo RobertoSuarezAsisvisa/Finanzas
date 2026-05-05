@@ -43,13 +43,17 @@ public sealed class Account : SoftDeletableEntity
 
     public void UpdateDetails(
         string name,
+        AccountType accountType,
         string currency,
+        decimal balance,
         string? bankName = null,
         string? accountNumber = null,
         string? provider = null)
     {
         Name = name.Trim();
+        AccountType = accountType;
         Currency = currency.Trim().ToUpperInvariant();
+        Balance = balance;
         BankName = bankName?.Trim();
         AccountNumber = accountNumber?.Trim();
         Provider = provider?.Trim();

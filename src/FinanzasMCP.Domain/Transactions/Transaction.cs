@@ -27,6 +27,25 @@ public sealed class Transaction : SoftDeletableEntity
 
     public ICollection<SavingGoalContribution> SavingGoalContributions { get; private set; } = new List<SavingGoalContribution>();
 
+    public void ReplaceTags(IEnumerable<Guid> tagIds)
+    {
+        var targetTagIds = tagIds.Distinct().ToHashSet();
+        var removedTags = Tags.Where(tag => !targetTagIds.Contains(tag.TagId)).ToArray();
+
+        foreach (var tag in removedTags)
+        {
+            Tags.Remove(tag);
+        }
+
+        var existingTagIds = Tags.Select(tag => tag.TagId).ToHashSet();
+        foreach (var tagId in targetTagIds.Where(tagId => !existingTagIds.Contains(tagId)))
+        {
+            Tags.Add(TransactionTag.Create(Id, tagId));
+        }
+
+        MarkUpdated();
+    }
+
     public static Transaction Create(
         TransactionType type,
         decimal amount,

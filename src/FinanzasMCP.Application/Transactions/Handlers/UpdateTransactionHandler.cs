@@ -12,9 +12,20 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
 {
     public async Task<TransactionSummary> Handle(UpdateTransactionCommand command, CancellationToken cancellationToken = default)
     {
+        if (command.Amount <= 0)
+        {
+            throw new InvalidOperationException("Amount must be positive.");
+        }
+
+        if (command.Type == TransactionType.Transfer && command.ToAccountId is null)
+        {
+            throw new InvalidOperationException("Destination account is required for transfers.");
+        }
+
         var transaction = await dbContext.Set<Transaction>()
             .Include(x => x.Account)
             .Include(x => x.ToAccount)
+            .Include(x => x.Tags)
             .FirstAsync(x => x.Id == command.Id, cancellationToken);
 
         Revert(transaction);
@@ -39,9 +50,10 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
             command.RecurringRuleId);
 
         Apply(transaction, account, toAccount);
+        transaction.ReplaceTags(command.TagIds);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new TransactionSummary(transaction.Id, transaction.Type, transaction.Amount, transaction.Currency, transaction.AccountId, transaction.ToAccountId, transaction.CategoryId, transaction.Description, transaction.Reference, transaction.TransactionDate);
+        return new TransactionSummary(transaction.Id, transaction.Type, transaction.Amount, transaction.Currency, transaction.AccountId, transaction.ToAccountId, transaction.CategoryId, transaction.Description, transaction.Reference, transaction.TransactionDate, transaction.Tags.Select(tag => tag.TagId).ToArray());
     }
 
     private static void Revert(Transaction transaction)

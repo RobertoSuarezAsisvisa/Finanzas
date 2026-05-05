@@ -8,4 +8,11 @@ public sealed class TransactionTag
     public Guid TagId { get; private set; }
 
     public Tag? Tag { get; private set; }
+
+    public static TransactionTag Create(Guid transactionId, Guid tagId)
+        => new()
+        {
+            TransactionId = transactionId,
+            TagId = tagId
+        };
 }

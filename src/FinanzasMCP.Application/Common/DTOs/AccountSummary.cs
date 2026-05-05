@@ -10,6 +10,7 @@ public sealed record AccountSummary(
     decimal Balance,
     bool IsActive,
     string? BankName,
+    string? AccountNumber,
     string? Provider,
     string? CryptoSymbol,
     string? CryptoNetwork,

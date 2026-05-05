@@ -42,7 +42,7 @@ public static class GoalEndpoints
 
         group.MapPost("{goalId:guid}/contributions", async (Guid goalId, AddSavingGoalContributionRequest request, AddSavingGoalContributionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new AddSavingGoalContributionCommand(goalId, request.Amount, request.ContributionDate, request.TransactionId), ct);
+            var result = await handler.Handle(new AddSavingGoalContributionCommand(goalId, request.Amount, request.ContributionDate, request.TransactionId, request.AccountId), ct);
             return Results.Created($"/api/v1/saving-goals/{goalId}/contributions", result);
         });
     }
@@ -54,7 +54,7 @@ public static class GoalEndpoints
 
         group.MapPut("{id:guid}", async (Guid id, UpdateSavingGoalContributionRequest request, UpdateSavingGoalContributionHandler handler, CancellationToken ct) =>
         {
-            await handler.Handle(new UpdateSavingGoalContributionCommand(id, request.Amount, request.ContributionDate, request.TransactionId), ct);
+            await handler.Handle(new UpdateSavingGoalContributionCommand(id, request.Amount, request.ContributionDate, request.TransactionId, request.AccountId), ct);
             return Results.NoContent();
         });
 
@@ -90,7 +90,7 @@ public static class GoalEndpoints
 
         group.MapPost("{purchaseGoalId:guid}/contributions", async (Guid purchaseGoalId, AddPurchaseGoalContributionRequest request, AddPurchaseGoalContributionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new AddPurchaseGoalContributionCommand(purchaseGoalId, request.Amount, request.ContributionDate, request.TransactionId), ct);
+            var result = await handler.Handle(new AddPurchaseGoalContributionCommand(purchaseGoalId, request.Amount, request.ContributionDate, request.TransactionId, request.AccountId), ct);
             return Results.Created($"/api/v1/purchase-goals/{purchaseGoalId}/contributions", result);
         });
     }
@@ -102,7 +102,7 @@ public static class GoalEndpoints
 
         group.MapPut("{id:guid}", async (Guid id, UpdatePurchaseGoalContributionRequest request, UpdatePurchaseGoalContributionHandler handler, CancellationToken ct) =>
         {
-            await handler.Handle(new UpdatePurchaseGoalContributionCommand(id, request.Amount, request.ContributionDate, request.TransactionId), ct);
+            await handler.Handle(new UpdatePurchaseGoalContributionCommand(id, request.Amount, request.ContributionDate, request.TransactionId, request.AccountId), ct);
             return Results.NoContent();
         });
 

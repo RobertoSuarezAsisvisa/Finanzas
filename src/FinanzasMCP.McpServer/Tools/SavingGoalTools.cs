@@ -24,8 +24,8 @@ public sealed class SavingGoalTools(
         => createSavingGoalHandler.Handle(new CreateSavingGoalCommand(name, targetAmount, accountId, targetDate), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Adds a contribution to a saving goal.")]
-    public Task<SavingGoalSummary> AddContribution(Guid goalId, decimal amount, DateTimeOffset contributionDate, Guid? transactionId = null, CancellationToken cancellationToken = default)
-        => addSavingGoalContributionHandler.Handle(new AddSavingGoalContributionCommand(goalId, amount, contributionDate, transactionId), cancellationToken);
+    public Task<SavingGoalSummary> AddContribution(Guid goalId, decimal amount, DateTimeOffset contributionDate, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
+        => addSavingGoalContributionHandler.Handle(new AddSavingGoalContributionCommand(goalId, amount, contributionDate, transactionId, accountId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a saving goal.")]
     public Task<SavingGoalSummary> UpdateSavingGoal(Guid id, string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, SavingGoalStatus? status = null, CancellationToken cancellationToken = default)
