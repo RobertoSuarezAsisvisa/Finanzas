@@ -7,6 +7,7 @@ public sealed record UpdateAccountCommand(
     string Name,
     AccountType AccountType,
     string Currency,
+    AccountPurpose Purpose,
     decimal Balance,
     string? BankName,
     string? AccountNumber,

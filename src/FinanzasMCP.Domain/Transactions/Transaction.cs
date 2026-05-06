@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.Budgets;
 using FinanzasMCP.Domain.Categories;
 using FinanzasMCP.Domain.Common;
 using FinanzasMCP.Domain.Contributions;
@@ -15,6 +16,7 @@ public sealed class Transaction : SoftDeletableEntity
     public Guid AccountId { get; private set; }
     public Guid? ToAccountId { get; private set; }
     public Guid? CategoryId { get; private set; }
+    public Guid? BudgetId { get; private set; }
     public string? Description { get; private set; }
     public string? Reference { get; private set; }
     public DateTimeOffset TransactionDate { get; private set; }
@@ -22,6 +24,7 @@ public sealed class Transaction : SoftDeletableEntity
     public Account Account { get; private set; } = null!;
     public Account? ToAccount { get; private set; }
     public Category? Category { get; private set; }
+    public Budget? Budget { get; private set; }
     public RecurringRule? RecurringRule { get; private set; }
     public ICollection<TransactionTag> Tags { get; private set; } = new List<TransactionTag>();
 
@@ -53,6 +56,7 @@ public sealed class Transaction : SoftDeletableEntity
         Guid accountId,
         Guid? toAccountId,
         Guid? categoryId,
+        Guid? budgetId,
         string? description,
         string? reference,
         DateTimeOffset transactionDate,
@@ -65,6 +69,7 @@ public sealed class Transaction : SoftDeletableEntity
             AccountId = accountId,
             ToAccountId = toAccountId,
             CategoryId = categoryId,
+            BudgetId = budgetId,
             Description = description?.Trim(),
             Reference = reference?.Trim(),
             TransactionDate = transactionDate,
@@ -78,6 +83,7 @@ public sealed class Transaction : SoftDeletableEntity
         Guid accountId,
         Guid? toAccountId,
         Guid? categoryId,
+        Guid? budgetId,
         string? description,
         string? reference,
         DateTimeOffset transactionDate,
@@ -89,6 +95,7 @@ public sealed class Transaction : SoftDeletableEntity
         AccountId = accountId;
         ToAccountId = toAccountId;
         CategoryId = categoryId;
+        BudgetId = budgetId;
         Description = description?.Trim();
         Reference = reference?.Trim();
         TransactionDate = transactionDate;

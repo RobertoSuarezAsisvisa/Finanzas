@@ -22,13 +22,14 @@ public sealed class TransactionTools(
         Guid accountId,
         Guid? toAccountId = null,
         Guid? categoryId = null,
+        Guid? budgetId = null,
         string? description = null,
         string? reference = null,
         DateTimeOffset? transactionDate = null,
         Guid? recurringRuleId = null,
         IReadOnlyList<Guid>? tagIds = null,
         CancellationToken cancellationToken = default)
-        => createTransactionHandler.Handle(new CreateTransactionCommand(type, amount, currency, accountId, toAccountId, categoryId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
+        => createTransactionHandler.Handle(new CreateTransactionCommand(type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Lists paged transactions with optional filters.")]
     public Task<PagedResult<TransactionSummary>> ListTransactions(
@@ -52,13 +53,14 @@ public sealed class TransactionTools(
         Guid accountId,
         Guid? toAccountId = null,
         Guid? categoryId = null,
+        Guid? budgetId = null,
         string? description = null,
         string? reference = null,
         DateTimeOffset? transactionDate = null,
         Guid? recurringRuleId = null,
         IReadOnlyList<Guid>? tagIds = null,
         CancellationToken cancellationToken = default)
-        => updateTransactionHandler.Handle(new UpdateTransactionCommand(id, type, amount, currency, accountId, toAccountId, categoryId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
+        => updateTransactionHandler.Handle(new UpdateTransactionCommand(id, type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Logically deletes a transaction and reverts its balance impact.")]
     public Task DeleteTransaction(Guid id, CancellationToken cancellationToken = default)

@@ -14,6 +14,7 @@ public sealed record CreateAccountRequest(
     string Name,
     AccountType AccountType,
     string Currency,
+    AccountPurpose Purpose,
     decimal Balance,
     string? BankName,
     string? AccountNumber,
@@ -27,6 +28,7 @@ public sealed record UpdateAccountRequest(
     string Name,
     AccountType AccountType,
     string Currency,
+    AccountPurpose Purpose,
     decimal Balance,
     string? BankName,
     string? AccountNumber,
@@ -50,6 +52,7 @@ public sealed record CreateTransactionRequest(
     Guid AccountId,
     Guid? ToAccountId,
     Guid? CategoryId,
+    Guid? BudgetId,
     string? Description,
     string? Reference,
     DateTimeOffset TransactionDate,
@@ -63,13 +66,14 @@ public sealed record UpdateTransactionRequest(
     Guid AccountId,
     Guid? ToAccountId,
     Guid? CategoryId,
+    Guid? BudgetId,
     string? Description,
     string? Reference,
     DateTimeOffset TransactionDate,
     Guid? RecurringRuleId,
     IReadOnlyList<Guid>? TagIds);
 
-public sealed record CreateBudgetRequest(string Name, Guid CategoryId, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd);
+public sealed record CreateBudgetRequest(string Name, Guid? CategoryId, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd);
 public sealed record UpdateBudgetRequest(string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd, bool IsActive);
 
 public sealed record CreateCryptoAccountRequest(Guid AccountId, string Symbol, string? Network, decimal Quantity, decimal? AvgBuyPriceUsd);
@@ -93,8 +97,8 @@ public sealed record UpdatePurchaseGoalContributionRequest(decimal Amount, DateT
 
 public sealed record CreateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, string? Notes);
 public sealed record UpdateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, DebtStatus? Status, string? Notes);
-public sealed record RegisterDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId);
-public sealed record UpdateDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId);
+public sealed record RegisterDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId, Guid? AccountId);
+public sealed record UpdateDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId, Guid? AccountId);
 
 public sealed record CreateRecurringRuleRequest(string Name, RecurringType Type, decimal Amount, Guid AccountId, Guid? CategoryId, RecurringFrequency Frequency, DateTimeOffset StartDate, DateTimeOffset? EndDate, DateTimeOffset NextDueDate);
 public sealed record UpdateRecurringRuleRequest(string Name, RecurringType Type, decimal Amount, Guid AccountId, Guid? CategoryId, RecurringFrequency Frequency, DateTimeOffset StartDate, DateTimeOffset? EndDate, DateTimeOffset NextDueDate, bool IsActive);

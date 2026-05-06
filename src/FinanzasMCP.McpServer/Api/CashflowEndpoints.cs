@@ -23,13 +23,13 @@ public static class CashflowEndpoints
 
         group.MapPost("", async (CreateTransactionRequest request, CreateTransactionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateTransactionCommand(request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
+            var result = await handler.Handle(new CreateTransactionCommand(request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
             return Results.Created($"/api/v1/transactions/{result.Id}", result);
         });
 
         group.MapPut("{id:guid}", async (Guid id, UpdateTransactionRequest request, UpdateTransactionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new UpdateTransactionCommand(id, request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
+            var result = await handler.Handle(new UpdateTransactionCommand(id, request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
             return Results.Ok(result);
         });
 
@@ -47,7 +47,7 @@ public static class CashflowEndpoints
 
         group.MapPost("", async (CreateBudgetRequest request, CreateBudgetHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateBudgetCommand(request.Name, request.CategoryId, request.LimitAmount, request.PeriodType, request.ValidityType, request.PeriodStart, request.PeriodEnd), ct);
+            var result = await handler.Handle(new CreateBudgetCommand(request.Name, request.LimitAmount, request.PeriodType, request.ValidityType, request.PeriodStart, request.PeriodEnd, request.CategoryId), ct);
             return Results.Created($"/api/v1/budgets/{result.Id}", result);
         });
 

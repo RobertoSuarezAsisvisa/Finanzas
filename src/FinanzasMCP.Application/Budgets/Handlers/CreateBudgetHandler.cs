@@ -9,7 +9,7 @@ public sealed class CreateBudgetHandler(IFinanzasMCPDbContext dbContext)
 {
     public async Task<BudgetSummary> Handle(CreateBudgetCommand command, CancellationToken cancellationToken = default)
     {
-        var budget = Budget.Create(command.Name, command.CategoryId, command.LimitAmount, command.PeriodType, command.ValidityType, command.PeriodStart, command.PeriodEnd);
+        var budget = Budget.Create(command.Name, command.LimitAmount, command.PeriodType, command.ValidityType, command.PeriodStart, command.PeriodEnd, command.CategoryId);
         dbContext.Set<Budget>().Add(budget);
         await dbContext.SaveChangesAsync(cancellationToken);
         return new BudgetSummary(budget.Id, budget.Name, budget.CategoryId, budget.LimitAmount, budget.PeriodType, budget.ValidityType, budget.PeriodStart, budget.PeriodEnd, budget.IsActive);

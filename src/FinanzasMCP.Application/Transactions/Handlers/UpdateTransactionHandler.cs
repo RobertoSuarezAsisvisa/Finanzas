@@ -44,6 +44,7 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
             command.AccountId,
             command.ToAccountId,
             command.CategoryId,
+            command.BudgetId,
             command.Description,
             command.Reference,
             command.TransactionDate.ToUtcSafe(),
@@ -53,7 +54,7 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
         transaction.ReplaceTags(command.TagIds);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new TransactionSummary(transaction.Id, transaction.Type, transaction.Amount, transaction.Currency, transaction.AccountId, transaction.ToAccountId, transaction.CategoryId, transaction.Description, transaction.Reference, transaction.TransactionDate, transaction.Tags.Select(tag => tag.TagId).ToArray());
+        return new TransactionSummary(transaction.Id, transaction.Type, transaction.Amount, transaction.Currency, transaction.AccountId, transaction.ToAccountId, transaction.CategoryId, transaction.BudgetId, transaction.Description, transaction.Reference, transaction.TransactionDate, transaction.Tags.Select(tag => tag.TagId).ToArray());
     }
 
     private static void Revert(Transaction transaction)

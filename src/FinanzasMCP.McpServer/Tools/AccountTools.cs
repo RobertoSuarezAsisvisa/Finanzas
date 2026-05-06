@@ -19,6 +19,7 @@ public sealed class AccountTools(
         string name,
         AccountType accountType,
         string currency = "USD",
+        AccountPurpose purpose = AccountPurpose.Spending,
         decimal balance = 0m,
         string? bankName = null,
         string? accountNumber = null,
@@ -28,7 +29,7 @@ public sealed class AccountTools(
         decimal? cryptoQuantity = null,
         decimal? cryptoAvgBuyPriceUsd = null,
         CancellationToken cancellationToken = default)
-        => createAccountHandler.Handle(new CreateAccountCommand(name, accountType, currency, balance, bankName, accountNumber, provider, cryptoSymbol, cryptoNetwork, cryptoQuantity, cryptoAvgBuyPriceUsd), cancellationToken);
+        => createAccountHandler.Handle(new CreateAccountCommand(name, accountType, currency, purpose, balance, bankName, accountNumber, provider, cryptoSymbol, cryptoNetwork, cryptoQuantity, cryptoAvgBuyPriceUsd), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Lists the stored financial accounts.")]
     public Task<IReadOnlyList<AccountSummary>> ListAccounts(CancellationToken cancellationToken = default)
@@ -40,6 +41,7 @@ public sealed class AccountTools(
         string name,
         AccountType accountType,
         string currency = "USD",
+        AccountPurpose purpose = AccountPurpose.Spending,
         decimal balance = 0m,
         string? bankName = null,
         string? accountNumber = null,
@@ -50,7 +52,7 @@ public sealed class AccountTools(
         decimal? cryptoAvgBuyPriceUsd = null,
         bool isActive = true,
         CancellationToken cancellationToken = default)
-        => updateAccountHandler.Handle(new UpdateAccountCommand(id, name, accountType, currency, balance, bankName, accountNumber, provider, cryptoSymbol, cryptoNetwork, cryptoQuantity, cryptoAvgBuyPriceUsd, isActive), cancellationToken);
+        => updateAccountHandler.Handle(new UpdateAccountCommand(id, name, accountType, currency, purpose, balance, bankName, accountNumber, provider, cryptoSymbol, cryptoNetwork, cryptoQuantity, cryptoAvgBuyPriceUsd, isActive), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Logically deletes an account.")]
     public Task DeleteAccount(Guid id, CancellationToken cancellationToken = default)

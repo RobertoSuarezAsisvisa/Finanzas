@@ -34,8 +34,21 @@ public sealed class Debt : SoftDeletableEntity
 
     public void RegisterPayment(decimal amount)
     {
-        RemainingAmount -= amount;
-        if (RemainingAmount <= 0) Status = DebtStatus.Paid;
+        AdjustPayment(amount);
+    }
+
+    public void AdjustPayment(decimal delta)
+    {
+        RemainingAmount -= delta;
+        if (RemainingAmount <= 0)
+        {
+            RemainingAmount = 0m;
+            Status = DebtStatus.Paid;
+        }
+        else if (Status == DebtStatus.Paid)
+        {
+            Status = DebtStatus.Active;
+        }
         MarkUpdated();
     }
 

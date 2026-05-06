@@ -24,8 +24,8 @@ public sealed class DebtTools(
         => getDebtsHandler.Handle(new GetDebtsQuery(), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Registers a payment for a debt.")]
-    public Task<DebtSummary> RegisterDebtPayment(Guid debtId, decimal amount, DateTimeOffset paymentDate, string? notes = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
-        => registerDebtPaymentHandler.Handle(new RegisterDebtPaymentCommand(debtId, amount, paymentDate, notes, transactionId), cancellationToken);
+    public Task<DebtSummary> RegisterDebtPayment(Guid debtId, decimal amount, DateTimeOffset paymentDate, string? notes = null, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
+        => registerDebtPaymentHandler.Handle(new RegisterDebtPaymentCommand(debtId, amount, paymentDate, notes, transactionId, accountId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a debt.")]
     public Task<DebtSummary> UpdateDebt(Guid id, DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, DebtStatus? status = null, string? notes = null, CancellationToken cancellationToken = default)

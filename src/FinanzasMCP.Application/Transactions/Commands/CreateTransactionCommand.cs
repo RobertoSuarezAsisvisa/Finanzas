@@ -9,6 +9,7 @@ public sealed record CreateTransactionCommand(
     Guid AccountId,
     Guid? ToAccountId,
     Guid? CategoryId,
+    Guid? BudgetId,
     string? Description,
     string? Reference,
     DateTimeOffset TransactionDate,

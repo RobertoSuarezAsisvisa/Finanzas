@@ -7,6 +7,7 @@ public sealed record AccountSummary(
     string Name,
     AccountType AccountType,
     string Currency,
+    AccountPurpose Purpose,
     decimal Balance,
     bool IsActive,
     string? BankName,

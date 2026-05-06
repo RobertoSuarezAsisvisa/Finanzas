@@ -3,6 +3,7 @@ using System;
 using FinanzasMCP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(FinanzasMCPDbContext))]
-    partial class FinanzasMCPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506035703_AddAccountPurpose")]
+    partial class AddAccountPurpose
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,7 +186,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CategoryId")
+                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -227,7 +230,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("Name", "PeriodType", "ValidityType", "PeriodStart")
+                    b.HasIndex("Name", "CategoryId", "PeriodType", "ValidityType", "PeriodStart")
                         .IsUnique();
 
                     b.ToTable("budgets", (string)null);
@@ -715,9 +718,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<Guid?>("BudgetId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
@@ -760,8 +760,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
-
-                    b.HasIndex("BudgetId");
 
                     b.HasIndex("CategoryId");
 
@@ -837,7 +835,8 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.HasOne("FinanzasMCP.Domain.Categories.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Category");
                 });
@@ -953,11 +952,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FinanzasMCP.Domain.Budgets.Budget", "Budget")
-                        .WithMany()
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("FinanzasMCP.Domain.Categories.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -974,8 +968,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Account");
-
-                    b.Navigation("Budget");
 
                     b.Navigation("Category");
 

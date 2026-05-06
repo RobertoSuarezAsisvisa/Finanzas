@@ -29,7 +29,7 @@ public sealed class UpdateAccountHandler(IFinanzasMCPDbContext dbContext)
             .Include(x => x.CryptoAccount)
             .FirstAsync(x => x.Id == command.Id, cancellationToken);
 
-        account.UpdateDetails(command.Name, command.AccountType, command.Currency, command.Balance, command.BankName, command.AccountNumber, command.Provider);
+        account.UpdateDetails(command.Name, command.AccountType, command.Currency, command.Purpose, command.Balance, command.BankName, command.AccountNumber, command.Provider);
 
         await SyncCryptoAccount(command, cancellationToken);
 
@@ -88,6 +88,7 @@ public sealed class UpdateAccountHandler(IFinanzasMCPDbContext dbContext)
             account.Name,
             account.AccountType,
             account.Currency,
+            account.Purpose,
             account.Balance,
             account.IsActive,
             account.BankName,

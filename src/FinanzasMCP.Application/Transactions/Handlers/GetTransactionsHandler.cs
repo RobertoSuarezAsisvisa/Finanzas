@@ -65,6 +65,7 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
             x.AccountId,
             x.ToAccountId,
             x.CategoryId,
+            x.BudgetId,
             x.Description,
             x.Reference,
             x.TransactionDate,

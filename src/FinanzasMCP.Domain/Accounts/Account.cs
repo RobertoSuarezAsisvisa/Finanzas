@@ -7,6 +7,7 @@ public sealed class Account : SoftDeletableEntity
     public string Name { get; private set; } = string.Empty;
     public AccountType AccountType { get; private set; }
     public string Currency { get; private set; } = "USD";
+    public AccountPurpose Purpose { get; private set; } = AccountPurpose.Spending;
     public decimal Balance { get; private set; }
     public string? BankName { get; private set; }
     public string? AccountNumber { get; private set; }
@@ -45,6 +46,7 @@ public sealed class Account : SoftDeletableEntity
         string name,
         AccountType accountType,
         string currency,
+        AccountPurpose purpose,
         decimal balance,
         string? bankName = null,
         string? accountNumber = null,
@@ -53,6 +55,7 @@ public sealed class Account : SoftDeletableEntity
         Name = name.Trim();
         AccountType = accountType;
         Currency = currency.Trim().ToUpperInvariant();
+        Purpose = purpose;
         Balance = balance;
         BankName = bankName?.Trim();
         AccountNumber = accountNumber?.Trim();
@@ -64,6 +67,7 @@ public sealed class Account : SoftDeletableEntity
         string name,
         AccountType accountType,
         string currency = "USD",
+        AccountPurpose purpose = AccountPurpose.Spending,
         decimal balance = 0m,
         string? bankName = null,
         string? accountNumber = null,
@@ -74,6 +78,7 @@ public sealed class Account : SoftDeletableEntity
             Name = name.Trim(),
             AccountType = accountType,
             Currency = currency.Trim().ToUpperInvariant(),
+            Purpose = purpose,
             Balance = balance,
             BankName = bankName?.Trim(),
             AccountNumber = accountNumber?.Trim(),

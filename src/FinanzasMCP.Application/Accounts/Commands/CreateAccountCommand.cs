@@ -6,6 +6,7 @@ public sealed record CreateAccountCommand(
     string Name,
     AccountType AccountType,
     string Currency,
+    AccountPurpose Purpose,
     decimal Balance,
     string? BankName,
     string? AccountNumber,

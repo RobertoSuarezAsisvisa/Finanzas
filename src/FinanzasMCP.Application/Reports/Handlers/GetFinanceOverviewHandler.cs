@@ -15,7 +15,7 @@ public sealed class GetFinanceOverviewHandler(IFinanzasMCPDbContext dbContext)
     {
         var totalIncome = await dbContext.Set<Transaction>().Where(x => x.Type == TransactionType.Income).SumAsync(x => x.Amount, cancellationToken);
         var totalExpenses = await dbContext.Set<Transaction>().Where(x => x.Type == TransactionType.Expense).SumAsync(x => x.Amount, cancellationToken);
-        var totalAssets = await dbContext.Accounts.SumAsync(x => x.Balance, cancellationToken);
+        var totalAssets = await dbContext.Accounts.Where(x => x.IsActive).SumAsync(x => x.Balance, cancellationToken);
         var totalDebts = await dbContext.Set<Debt>()
             .Where(x => x.Type == DebtType.Payable && x.Status == DebtStatus.Active)
             .SumAsync(x => x.RemainingAmount, cancellationToken);

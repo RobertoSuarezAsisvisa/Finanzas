@@ -6,16 +6,16 @@ namespace FinanzasMCP.Domain.Budgets;
 public sealed class Budget : SoftDeletableEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public Guid CategoryId { get; private set; }
+    public Guid? CategoryId { get; private set; }
     public decimal LimitAmount { get; private set; }
     public PeriodType PeriodType { get; private set; }
     public BudgetValidityType ValidityType { get; private set; }
     public DateTimeOffset? PeriodStart { get; private set; }
     public DateTimeOffset? PeriodEnd { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public Category Category { get; private set; } = null!;
+    public Category? Category { get; private set; }
 
-    public static Budget Create(string name, Guid categoryId, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
+    public static Budget Create(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null, Guid? categoryId = null)
     {
         ValidatePeriod(validityType, periodStart, periodEnd);
         return new Budget
@@ -31,12 +31,13 @@ public sealed class Budget : SoftDeletableEntity
         };
     }
 
-    public void UpdateDetails(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart, DateTimeOffset? periodEnd, bool isActive)
+    public void UpdateDetails(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart, DateTimeOffset? periodEnd, bool isActive, Guid? categoryId = null)
     {
         ValidatePeriod(validityType, periodStart, periodEnd);
 
         Name = name.Trim();
         LimitAmount = limitAmount;
+        CategoryId = categoryId;
         PeriodType = periodType;
         ValidityType = validityType;
         PeriodStart = periodStart;

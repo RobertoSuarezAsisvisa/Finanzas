@@ -19,6 +19,7 @@ public sealed class BudgetConfiguration : IEntityTypeConfiguration<Budget>
         builder.Property(x => x.IsActive).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
-        builder.HasIndex(x => new { x.Name, x.CategoryId, x.PeriodType, x.ValidityType, x.PeriodStart }).IsUnique();
+        builder.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(x => new { x.Name, x.PeriodType, x.ValidityType, x.PeriodStart }).IsUnique();
     }
 }

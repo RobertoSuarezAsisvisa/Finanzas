@@ -45,6 +45,7 @@ public sealed class UpdateSavingGoalContributionHandler(IFinanzasMCPDbContext db
                 sourceAccount.Id,
                 targetAccount?.Id,
                 null,
+                null,
                 $"Aporte a meta de ahorro: {contribution.SavingGoal.Name}",
                 $"saving-goal:{contribution.SavingGoal.Id}",
                 command.ContributionDate.ToUtcSafe(),

@@ -15,8 +15,8 @@ public sealed class BudgetTools(
     DeleteBudgetHandler deleteBudgetHandler)
 {
     [McpServerTool, System.ComponentModel.Description("Creates a budget by category and validity mode.")]
-    public Task<BudgetSummary> CreateBudget(string name, Guid categoryId, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null, CancellationToken cancellationToken = default)
-        => createBudgetHandler.Handle(new CreateBudgetCommand(name, categoryId, limitAmount, periodType, validityType, periodStart, periodEnd), cancellationToken);
+    public Task<BudgetSummary> CreateBudget(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null, Guid? categoryId = null, CancellationToken cancellationToken = default)
+        => createBudgetHandler.Handle(new CreateBudgetCommand(name, limitAmount, periodType, validityType, periodStart, periodEnd, categoryId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Lists budgets.")]
     public Task<IReadOnlyList<BudgetSummary>> ListBudgets(CancellationToken cancellationToken = default)

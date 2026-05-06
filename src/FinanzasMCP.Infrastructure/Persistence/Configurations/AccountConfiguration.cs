@@ -12,6 +12,7 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Name).HasMaxLength(300).IsRequired();
         builder.Property(x => x.AccountType).HasConversion<string>().HasMaxLength(30).IsRequired();
+        builder.Property(x => x.Purpose).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(x => x.Currency).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Balance).HasPrecision(18, 2);
         builder.Property(x => x.BankName).HasMaxLength(200);

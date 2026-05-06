@@ -21,8 +21,10 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
         builder.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.ToAccount).WithMany().HasForeignKey(x => x.ToAccountId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne(x => x.Budget).WithMany().HasForeignKey(x => x.BudgetId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(x => x.RecurringRule).WithMany().HasForeignKey(x => x.RecurringRuleId).OnDelete(DeleteBehavior.SetNull);
         builder.HasIndex(x => x.TransactionDate);
         builder.HasIndex(x => x.AccountId);
+        builder.HasIndex(x => x.BudgetId);
     }
 }

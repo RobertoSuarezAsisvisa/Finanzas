@@ -27,6 +27,7 @@ public sealed class GetAccountsHandler(IFinanzasMCPDbContext dbContext)
             account.Name,
             account.AccountType,
             account.Currency,
+            account.Purpose,
             account.Balance,
             account.IsActive,
             account.BankName,

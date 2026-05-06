@@ -43,6 +43,7 @@ public sealed class AddPurchaseGoalContributionHandler(IFinanzasMCPDbContext dbC
                 sourceAccount.Id,
                 targetAccount?.Id,
                 null,
+                null,
                 $"Aporte a meta de compra: {goal.Name}",
                 $"purchase-goal:{goal.Id}",
                 command.ContributionDate.ToUtcSafe(),

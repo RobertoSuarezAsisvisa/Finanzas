@@ -37,7 +37,7 @@ public static class DebtEndpoints
 
         group.MapPost("{debtId:guid}/payments", async (Guid debtId, RegisterDebtPaymentRequest request, RegisterDebtPaymentHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new RegisterDebtPaymentCommand(debtId, request.Amount, request.PaymentDate, request.Notes, request.TransactionId), ct);
+            var result = await handler.Handle(new RegisterDebtPaymentCommand(debtId, request.Amount, request.PaymentDate, request.Notes, request.TransactionId, request.AccountId), ct);
             return Results.Created($"/api/v1/debts/{debtId}/payments", result);
         });
     }
@@ -49,7 +49,7 @@ public static class DebtEndpoints
 
         group.MapPut("{id:guid}", async (Guid id, UpdateDebtPaymentRequest request, UpdateDebtPaymentHandler handler, CancellationToken ct) =>
         {
-            await handler.Handle(new UpdateDebtPaymentCommand(id, request.Amount, request.PaymentDate, request.Notes, request.TransactionId), ct);
+            await handler.Handle(new UpdateDebtPaymentCommand(id, request.Amount, request.PaymentDate, request.Notes, request.TransactionId, request.AccountId), ct);
             return Results.NoContent();
         });
 
