@@ -35,6 +35,7 @@ public sealed class FinanzasMCPDbContext(DbContextOptions<FinanzasMCPDbContext> 
     public DbSet<PurchaseGoalContribution> PurchaseGoalContributions => Set<PurchaseGoalContribution>();
     public DbSet<Debt> Debts => Set<Debt>();
     public DbSet<DebtPayment> DebtPayments => Set<DebtPayment>();
+    public DbSet<DebtInstallment> DebtInstallments => Set<DebtInstallment>();
     public DbSet<AccountingPeriod> AccountingPeriods => Set<AccountingPeriod>();
     public DbSet<UserContextEntry> UserContextEntries => Set<UserContextEntry>();
 

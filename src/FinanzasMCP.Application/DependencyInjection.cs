@@ -14,6 +14,7 @@ using FinanzasMCP.Application.Crypto.Handlers;
 using FinanzasMCP.Application.Crypto.Commands;
 using FinanzasMCP.Application.Crypto.Queries;
 using FinanzasMCP.Application.Debts.Handlers;
+using FinanzasMCP.Application.Debts.Services;
 using FinanzasMCP.Application.Debts.Commands;
 using FinanzasMCP.Application.Debts.Queries;
 using FinanzasMCP.Application.PurchaseGoals.Handlers;
@@ -84,6 +85,8 @@ public static class DependencyInjection
         services.AddScoped<DeletePurchaseGoalHandler>();
         services.AddScoped<CreateDebtHandler>();
         services.AddScoped<UpdateDebtHandler>();
+        services.AddScoped<GetDebtInstallmentsHandler>();
+        services.AddScoped<DebtInstallmentScheduleService>();
         services.AddScoped<DeleteDebtHandler>();
         services.AddScoped<GetDebtsHandler>();
         services.AddScoped<AddSavingGoalContributionHandler>();

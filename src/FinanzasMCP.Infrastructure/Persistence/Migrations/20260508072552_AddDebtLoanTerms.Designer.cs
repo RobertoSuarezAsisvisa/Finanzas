@@ -3,6 +3,7 @@ using System;
 using FinanzasMCP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(FinanzasMCPDbContext))]
-    partial class FinanzasMCPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260508072552_AddDebtLoanTerms")]
+    partial class AddDebtLoanTerms
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -478,56 +481,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.ToTable("debts", (string)null);
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Debts.DebtInstallment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("BalanceAfterPayment")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("DebtId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("DueDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("ExpectedPayment")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("Interest")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Principal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DueDate");
-
-                    b.HasIndex("DebtId", "Number")
-                        .IsUnique();
-
-                    b.ToTable("debt_installments", (string)null);
-                });
-
             modelBuilder.Entity("FinanzasMCP.Domain.Debts.DebtPayment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -967,17 +920,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Debts.DebtInstallment", b =>
-                {
-                    b.HasOne("FinanzasMCP.Domain.Debts.Debt", "Debt")
-                        .WithMany("Installments")
-                        .HasForeignKey("DebtId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Debt");
-                });
-
             modelBuilder.Entity("FinanzasMCP.Domain.Debts.DebtPayment", b =>
                 {
                     b.HasOne("FinanzasMCP.Domain.Debts.Debt", "Debt")
@@ -1096,8 +1038,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FinanzasMCP.Domain.Debts.Debt", b =>
                 {
-                    b.Navigation("Installments");
-
                     b.Navigation("Payments");
                 });
 

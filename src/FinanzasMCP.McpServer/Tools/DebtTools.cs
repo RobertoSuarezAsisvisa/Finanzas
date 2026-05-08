@@ -13,23 +13,28 @@ public sealed class DebtTools(
     RegisterDebtPaymentHandler registerDebtPaymentHandler,
     UpdateDebtHandler updateDebtHandler,
     DeleteDebtHandler deleteDebtHandler,
-    GetDebtsHandler getDebtsHandler)
+    GetDebtsHandler getDebtsHandler,
+    GetDebtInstallmentsHandler getDebtInstallmentsHandler)
 {
     [McpServerTool, System.ComponentModel.Description("Creates a debt.")]
-    public Task<DebtSummary> CreateDebt(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, string? notes = null, CancellationToken cancellationToken = default)
-        => createDebtHandler.Handle(new CreateDebtCommand(type, contactName, originalAmount, remainingAmount, currency, dueDate, accountId, notes), cancellationToken);
+    public Task<DebtSummary> CreateDebt(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, string? notes = null, decimal? interestRate = null, InterestPeriod? interestPeriod = null, AmortizationMethod? amortizationMethod = null, int? termMonths = null, DateTimeOffset? loanStartDate = null, CancellationToken cancellationToken = default)
+        => createDebtHandler.Handle(new CreateDebtCommand(type, contactName, originalAmount, remainingAmount, currency, dueDate, accountId, notes, interestRate, interestPeriod, amortizationMethod, termMonths, loanStartDate), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Lists debts.")]
     public Task<IReadOnlyList<DebtSummary>> ListDebts(CancellationToken cancellationToken = default)
         => getDebtsHandler.Handle(new GetDebtsQuery(), cancellationToken);
+
+    [McpServerTool, System.ComponentModel.Description("Lists expected debt installments with payment status.")]
+    public Task<IReadOnlyList<DebtInstallmentSummary>> ListDebtInstallments(Guid? debtId = null, CancellationToken cancellationToken = default)
+        => getDebtInstallmentsHandler.Handle(new GetDebtInstallmentsQuery(debtId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Registers a payment for a debt.")]
     public Task<DebtSummary> RegisterDebtPayment(Guid debtId, decimal amount, DateTimeOffset paymentDate, string? notes = null, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
         => registerDebtPaymentHandler.Handle(new RegisterDebtPaymentCommand(debtId, amount, paymentDate, notes, transactionId, accountId), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a debt.")]
-    public Task<DebtSummary> UpdateDebt(Guid id, DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, DebtStatus? status = null, string? notes = null, CancellationToken cancellationToken = default)
-        => updateDebtHandler.Handle(new UpdateDebtCommand(id, type, contactName, originalAmount, remainingAmount, currency, dueDate, accountId, status, notes), cancellationToken);
+    public Task<DebtSummary> UpdateDebt(Guid id, DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, DebtStatus? status = null, string? notes = null, decimal? interestRate = null, InterestPeriod? interestPeriod = null, AmortizationMethod? amortizationMethod = null, int? termMonths = null, DateTimeOffset? loanStartDate = null, CancellationToken cancellationToken = default)
+        => updateDebtHandler.Handle(new UpdateDebtCommand(id, type, contactName, originalAmount, remainingAmount, currency, dueDate, accountId, status, notes, interestRate, interestPeriod, amortizationMethod, termMonths, loanStartDate), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Logically deletes a debt.")]
     public Task DeleteDebt(Guid id, CancellationToken cancellationToken = default)

@@ -17,6 +17,9 @@ public sealed class DebtConfiguration : IEntityTypeConfiguration<Debt>
         builder.Property(x => x.Currency).HasMaxLength(10).IsRequired();
         builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(x => x.Notes).HasMaxLength(1000);
+        builder.Property(x => x.InterestRate).HasPrecision(9, 4);
+        builder.Property(x => x.InterestPeriod).HasConversion<string>().HasMaxLength(20);
+        builder.Property(x => x.AmortizationMethod).HasConversion<string>().HasMaxLength(20);
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.HasIndex(x => x.Status);

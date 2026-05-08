@@ -14,11 +14,17 @@ public sealed class Debt : SoftDeletableEntity
     public Guid? AccountId { get; private set; }
     public DebtStatus Status { get; private set; }
     public string? Notes { get; private set; }
+    public decimal? InterestRate { get; private set; }
+    public InterestPeriod? InterestPeriod { get; private set; }
+    public AmortizationMethod? AmortizationMethod { get; private set; }
+    public int? TermMonths { get; private set; }
+    public DateTimeOffset? LoanStartDate { get; private set; }
     public Account? Account { get; private set; }
 
     public ICollection<DebtPayment> Payments { get; private set; } = new List<DebtPayment>();
+    public ICollection<DebtInstallment> Installments { get; private set; } = new List<DebtInstallment>();
 
-    public static Debt Create(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, string? notes = null)
+    public static Debt Create(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, string? notes = null, decimal? interestRate = null, InterestPeriod? interestPeriod = null, AmortizationMethod? amortizationMethod = null, int? termMonths = null, DateTimeOffset? loanStartDate = null)
         => new()
         {
             Type = type,
@@ -29,7 +35,12 @@ public sealed class Debt : SoftDeletableEntity
             DueDate = dueDate,
             AccountId = accountId,
             Status = DebtStatus.Active,
-            Notes = notes?.Trim()
+            Notes = notes?.Trim(),
+            InterestRate = interestRate,
+            InterestPeriod = interestPeriod,
+            AmortizationMethod = amortizationMethod,
+            TermMonths = termMonths,
+            LoanStartDate = loanStartDate
         };
 
     public void RegisterPayment(decimal amount)
@@ -52,7 +63,7 @@ public sealed class Debt : SoftDeletableEntity
         MarkUpdated();
     }
 
-    public void UpdateDetails(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, DebtStatus? status = null, string? notes = null)
+    public void UpdateDetails(DebtType type, string contactName, decimal originalAmount, decimal remainingAmount, string currency = "USD", DateTimeOffset? dueDate = null, Guid? accountId = null, DebtStatus? status = null, string? notes = null, decimal? interestRate = null, InterestPeriod? interestPeriod = null, AmortizationMethod? amortizationMethod = null, int? termMonths = null, DateTimeOffset? loanStartDate = null)
     {
         Type = type;
         ContactName = contactName.Trim();
@@ -66,6 +77,11 @@ public sealed class Debt : SoftDeletableEntity
             Status = status.Value;
         }
         Notes = notes?.Trim();
+        InterestRate = interestRate;
+        InterestPeriod = interestPeriod;
+        AmortizationMethod = amortizationMethod;
+        TermMonths = termMonths;
+        LoanStartDate = loanStartDate;
         MarkUpdated();
     }
 }

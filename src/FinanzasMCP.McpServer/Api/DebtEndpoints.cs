@@ -10,6 +10,7 @@ public static class DebtEndpoints
     {
         MapDebts(api.MapGroup("/debts"));
         MapDebtPayments(api.MapGroup("/debt-payments"));
+        MapDebtInstallments(api.MapGroup("/debt-installments"));
     }
 
     private static void MapDebts(RouteGroupBuilder group)
@@ -19,13 +20,13 @@ public static class DebtEndpoints
 
         group.MapPost("", async (CreateDebtRequest request, CreateDebtHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateDebtCommand(request.Type, request.ContactName, request.OriginalAmount, request.RemainingAmount, request.Currency, request.DueDate, request.AccountId, request.Notes), ct);
+            var result = await handler.Handle(new CreateDebtCommand(request.Type, request.ContactName, request.OriginalAmount, request.RemainingAmount, request.Currency, request.DueDate, request.AccountId, request.Notes, request.InterestRate, request.InterestPeriod, request.AmortizationMethod, request.TermMonths, request.LoanStartDate), ct);
             return Results.Created($"/api/v1/debts/{result.Id}", result);
         });
 
         group.MapPut("{id:guid}", async (Guid id, UpdateDebtRequest request, UpdateDebtHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new UpdateDebtCommand(id, request.Type, request.ContactName, request.OriginalAmount, request.RemainingAmount, request.Currency, request.DueDate, request.AccountId, request.Status, request.Notes), ct);
+            var result = await handler.Handle(new UpdateDebtCommand(id, request.Type, request.ContactName, request.OriginalAmount, request.RemainingAmount, request.Currency, request.DueDate, request.AccountId, request.Status, request.Notes, request.InterestRate, request.InterestPeriod, request.AmortizationMethod, request.TermMonths, request.LoanStartDate), ct);
             return Results.Ok(result);
         });
 
@@ -58,5 +59,11 @@ public static class DebtEndpoints
             await handler.Handle(new DeleteDebtPaymentCommand(id), ct);
             return Results.NoContent();
         });
+    }
+
+    private static void MapDebtInstallments(RouteGroupBuilder group)
+    {
+        group.MapGet("", async (Guid? debtId, GetDebtInstallmentsHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetDebtInstallmentsQuery(debtId), ct)));
     }
 }

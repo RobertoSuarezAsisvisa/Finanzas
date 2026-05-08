@@ -54,7 +54,7 @@ public sealed class RegisterDebtPaymentHandler(IFinanzasMCPDbContext dbContext)
         dbContext.Set<DebtPayment>().Add(DebtPayment.Create(debt.Id, command.Amount, command.PaymentDate.ToUtcSafe(), command.Notes, transactionId));
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new DebtSummary(debt.Id, debt.Type, debt.ContactName, debt.OriginalAmount, debt.RemainingAmount, debt.Currency, debt.DueDate, debt.AccountId, debt.Status, debt.Notes);
+        return new DebtSummary(debt.Id, debt.Type, debt.ContactName, debt.OriginalAmount, debt.RemainingAmount, debt.Currency, debt.DueDate, debt.AccountId, debt.Status, debt.Notes, debt.InterestRate, debt.InterestPeriod, debt.AmortizationMethod, debt.TermMonths, debt.LoanStartDate);
     }
 
     private static void Apply(TransactionType transactionType, Account account, decimal amount)

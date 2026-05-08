@@ -95,8 +95,8 @@ public sealed record UpdatePurchaseGoalRequest(string Name, decimal TargetPrice,
 public sealed record AddPurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 public sealed record UpdatePurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 
-public sealed record CreateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, string? Notes);
-public sealed record UpdateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, DebtStatus? Status, string? Notes);
+public sealed record CreateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, string? Notes, decimal? InterestRate, InterestPeriod? InterestPeriod, AmortizationMethod? AmortizationMethod, int? TermMonths, DateTimeOffset? LoanStartDate);
+public sealed record UpdateDebtRequest(DebtType Type, string ContactName, decimal OriginalAmount, decimal RemainingAmount, string Currency, DateTimeOffset? DueDate, Guid? AccountId, DebtStatus? Status, string? Notes, decimal? InterestRate, InterestPeriod? InterestPeriod, AmortizationMethod? AmortizationMethod, int? TermMonths, DateTimeOffset? LoanStartDate);
 public sealed record RegisterDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId, Guid? AccountId);
 public sealed record UpdateDebtPaymentRequest(decimal Amount, DateTimeOffset PaymentDate, string? Notes, Guid? TransactionId, Guid? AccountId);
 

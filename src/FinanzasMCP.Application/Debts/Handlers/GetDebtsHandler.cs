@@ -16,7 +16,7 @@ public sealed class GetDebtsHandler(IFinanzasMCPDbContext dbContext)
             .ToListAsync(cancellationToken);
 
         return debts
-            .Select(x => new DebtSummary(x.Id, x.Type, x.ContactName, x.OriginalAmount, x.RemainingAmount, x.Currency, x.DueDate, x.AccountId, x.Status, x.Notes))
+            .Select(x => new DebtSummary(x.Id, x.Type, x.ContactName, x.OriginalAmount, x.RemainingAmount, x.Currency, x.DueDate, x.AccountId, x.Status, x.Notes, x.InterestRate, x.InterestPeriod, x.AmortizationMethod, x.TermMonths, x.LoanStartDate))
             .ToArray();
     }
 }
