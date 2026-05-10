@@ -17,6 +17,6 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.HasOne(x => x.Parent).WithMany(x => x.Children).HasForeignKey(x => x.ParentId);
-        builder.HasIndex(x => new { x.Name, x.ParentId }).IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.Name, x.ParentId }).IsUnique();
     }
 }

@@ -2,7 +2,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.UserContext;
 
-public sealed class UserContextEntry : SoftDeletableEntity
+public sealed class UserContextEntry : UserOwnedEntity
 {
     public string Key { get; private set; } = string.Empty;
     public string Value { get; private set; } = string.Empty;

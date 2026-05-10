@@ -2,7 +2,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Categories;
 
-public sealed class Category : SoftDeletableEntity
+public sealed class Category : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public CategoryType Type { get; private set; }

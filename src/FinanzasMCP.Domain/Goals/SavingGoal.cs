@@ -4,7 +4,7 @@ using FinanzasMCP.Domain.Contributions;
 
 namespace FinanzasMCP.Domain.Goals;
 
-public sealed class SavingGoal : SoftDeletableEntity
+public sealed class SavingGoal : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public decimal GoalAmount { get; private set; } // Monto objetivo para alcanzar la meta de ahorro

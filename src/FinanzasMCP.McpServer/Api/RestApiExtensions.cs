@@ -6,17 +6,20 @@ public static class RestApiExtensions
     {
         var api = app.MapGroup("/api/v1");
 
-        api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+        api.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
+        api.MapAuthEndpoints();
 
-        api.MapAccountEndpoints();
-        api.MapCatalogEndpoints();
-        api.MapCashflowEndpoints();
-        api.MapCryptoEndpoints();
-        api.MapAccountingPeriodEndpoints();
-        api.MapGoalEndpoints();
-        api.MapDebtEndpoints();
-        api.MapRecurringRuleEndpoints();
-        api.MapContextAndReportEndpoints();
+        var secureApi = api.MapGroup("").RequireAuthorization();
+
+        secureApi.MapAccountEndpoints();
+        secureApi.MapCatalogEndpoints();
+        secureApi.MapCashflowEndpoints();
+        secureApi.MapCryptoEndpoints();
+        secureApi.MapAccountingPeriodEndpoints();
+        secureApi.MapGoalEndpoints();
+        secureApi.MapDebtEndpoints();
+        secureApi.MapRecurringRuleEndpoints();
+        secureApi.MapContextAndReportEndpoints();
 
         return app;
     }

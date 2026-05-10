@@ -8,7 +8,7 @@ using FinanzasMCP.Domain.Tags;
 
 namespace FinanzasMCP.Domain.Transactions;
 
-public sealed class Transaction : SoftDeletableEntity
+public sealed class Transaction : UserOwnedEntity
 {
     public TransactionType Type { get; private set; }
     public decimal Amount { get; private set; }

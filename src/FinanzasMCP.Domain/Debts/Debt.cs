@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Debts;
 
-public sealed class Debt : SoftDeletableEntity
+public sealed class Debt : UserOwnedEntity
 {
     public DebtType Type { get; private set; }
     public string ContactName { get; private set; } = string.Empty;

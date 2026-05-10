@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Goals;
 
 namespace FinanzasMCP.Domain.Contributions;
 
-public sealed class PurchaseGoalContribution : SoftDeletableEntity
+public sealed class PurchaseGoalContribution : UserOwnedEntity
 {
     public Guid PurchaseGoalId { get; private set; }
     public Guid? TransactionId { get; private set; }

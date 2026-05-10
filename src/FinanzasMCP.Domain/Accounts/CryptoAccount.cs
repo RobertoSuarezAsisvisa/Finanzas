@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Crypto;
 
 namespace FinanzasMCP.Domain.Accounts;
 
-public sealed class CryptoAccount : SoftDeletableEntity
+public sealed class CryptoAccount : UserOwnedEntity
 {
     public Guid AccountId { get; private set; }
     public string Symbol { get; private set; } = string.Empty;

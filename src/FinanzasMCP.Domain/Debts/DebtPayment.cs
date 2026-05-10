@@ -2,7 +2,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Debts;
 
-public sealed class DebtPayment : SoftDeletableEntity
+public sealed class DebtPayment : UserOwnedEntity
 {
     public Guid DebtId { get; private set; }
     public Guid? TransactionId { get; private set; }
