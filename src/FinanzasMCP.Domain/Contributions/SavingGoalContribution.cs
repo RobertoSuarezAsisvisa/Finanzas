@@ -4,7 +4,7 @@ using FinanzasMCP.Domain.Transactions;
 
 namespace FinanzasMCP.Domain.Contributions;
 
-public sealed class SavingGoalContribution : SoftDeletableEntity
+public sealed class SavingGoalContribution : UserOwnedEntity
 {
     public Guid GoalId { get; private set; }
     public Guid? TransactionId { get; private set; }

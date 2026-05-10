@@ -4,7 +4,7 @@ using FinanzasMCP.Domain.Contributions;
 
 namespace FinanzasMCP.Domain.Goals;
 
-public sealed class PurchaseGoal : SoftDeletableEntity
+public sealed class PurchaseGoal : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }

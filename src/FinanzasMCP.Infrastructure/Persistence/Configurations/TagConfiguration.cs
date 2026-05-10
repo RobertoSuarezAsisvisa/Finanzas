@@ -14,6 +14,6 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.Property(x => x.Color).HasMaxLength(20);
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.Name }).IsUnique();
     }
 }

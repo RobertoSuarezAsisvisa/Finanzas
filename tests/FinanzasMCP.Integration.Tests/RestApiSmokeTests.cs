@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FinanzasMCP.Application.Common.DTOs;
 using FinanzasMCP.Domain.Accounts;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -35,14 +36,14 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         factory.InitializeDatabase();
         var client = factory.CreateClient();
         using var request = new HttpRequestMessage(HttpMethod.Options, "/api/v1/health");
-        request.Headers.Add("Origin", "https://example.com");
+        request.Headers.Add("Origin", "http://localhost:4200");
         request.Headers.Add("Access-Control-Request-Method", "GET");
 
         var response = await client.SendAsync(request);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.True(response.Headers.TryGetValues("Access-Control-Allow-Origin", out var origins));
-        Assert.Contains("*", origins);
+        Assert.Contains("http://localhost:4200", origins);
     }
 
     [Fact]
@@ -50,6 +51,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     {
         factory.InitializeDatabase();
         var client = factory.CreateClient();
+        await AuthenticateAsync(client);
 
         var createAccountResponse = await client.PostAsJsonAsync("/api/v1/accounts", new
         {
@@ -90,6 +92,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     {
         factory.InitializeDatabase();
         var client = factory.CreateClient();
+        await AuthenticateAsync(client);
 
         var createAccountResponse = await client.PostAsJsonAsync("/api/v1/accounts", new
         {
@@ -133,6 +136,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     {
         factory.InitializeDatabase();
         var client = factory.CreateClient();
+        await AuthenticateAsync(client);
 
         var createAccountResponse = await client.PostAsJsonAsync("/api/v1/accounts", new
         {
@@ -157,4 +161,34 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
 
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
     }
+
+    [Fact]
+    public async Task Financial_endpoints_require_authentication()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/accounts");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private static async Task AuthenticateAsync(HttpClient client)
+    {
+        var email = $"test-{Guid.NewGuid():N}@finanzas.local";
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            password = "Password123!",
+            displayName = "Test User"
+        });
+
+        response.EnsureSuccessStatusCode();
+        var auth = await response.Content.ReadFromJsonAsync<AuthTestResponse>(JsonOptions);
+        Assert.NotNull(auth);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
+    }
+
+    private sealed record AuthTestResponse(string AccessToken, DateTimeOffset ExpiresAt, AuthTestUser User);
+    private sealed record AuthTestUser(Guid Id, string Email, string DisplayName);
 }

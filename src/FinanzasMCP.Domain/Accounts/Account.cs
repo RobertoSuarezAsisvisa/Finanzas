@@ -2,7 +2,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Accounts;
 
-public sealed class Account : SoftDeletableEntity
+public sealed class Account : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public AccountType AccountType { get; private set; }

@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Crypto;
 
-public sealed class CryptoLot : SoftDeletableEntity
+public sealed class CryptoLot : UserOwnedEntity
 {
     public Guid AccountId { get; private set; }
     public Guid? TransactionId { get; private set; }

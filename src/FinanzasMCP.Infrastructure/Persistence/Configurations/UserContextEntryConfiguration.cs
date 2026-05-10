@@ -14,6 +14,6 @@ public sealed class UserContextEntryConfiguration : IEntityTypeConfiguration<Use
         builder.Property(x => x.Value).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.Property(x => x.DeletedAt);
-        builder.HasIndex(x => x.Key).IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.Key }).IsUnique();
     }
 }

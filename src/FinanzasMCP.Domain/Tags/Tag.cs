@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Transactions;
 
 namespace FinanzasMCP.Domain.Tags;
 
-public sealed class Tag : SoftDeletableEntity
+public sealed class Tag : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public string? Color { get; private set; }

@@ -1,6 +1,7 @@
 using FinanzasMCP.Domain.Accounts;
 using FinanzasMCP.Domain.AccountingPeriods;
 using FinanzasMCP.Domain.Crypto;
+using FinanzasMCP.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -13,6 +14,8 @@ public interface IFinanzasMCPDbContext
     DbSet<CryptoAccount> CryptoAccounts { get; }
     DbSet<CryptoLot> CryptoLots { get; }
     DbSet<AccountingPeriod> AccountingPeriods { get; }
+    DbSet<AppUser> Users { get; }
+    DbSet<UserExternalLogin> UserExternalLogins { get; }
 
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

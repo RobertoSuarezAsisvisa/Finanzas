@@ -2,7 +2,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.AccountingPeriods;
 
-public sealed class AccountingPeriod : SoftDeletableEntity
+public sealed class AccountingPeriod : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public DateTimeOffset StartDate { get; private set; }

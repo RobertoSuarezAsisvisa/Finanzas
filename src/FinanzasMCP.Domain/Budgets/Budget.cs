@@ -3,7 +3,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Budgets;
 
-public sealed class Budget : SoftDeletableEntity
+public sealed class Budget : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public Guid? CategoryId { get; private set; }

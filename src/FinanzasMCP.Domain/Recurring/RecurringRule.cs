@@ -4,7 +4,7 @@ using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Recurring;
 
-public sealed class RecurringRule : SoftDeletableEntity
+public sealed class RecurringRule : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
     public RecurringType Type { get; private set; }
