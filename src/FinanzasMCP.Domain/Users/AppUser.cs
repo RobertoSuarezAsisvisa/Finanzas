@@ -12,6 +12,7 @@ public sealed class AppUser : Entity
     public DateTimeOffset? LastLoginAt { get; private set; }
     public bool IsActive { get; private set; } = true;
     public ICollection<UserExternalLogin> ExternalLogins { get; private set; } = new List<UserExternalLogin>();
+    public ICollection<UserApiKey> ApiKeys { get; private set; } = new List<UserApiKey>();
 
     public static AppUser Create(string email, string displayName, string? passwordHash = null)
         => new()

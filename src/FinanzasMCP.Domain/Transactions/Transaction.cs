@@ -27,6 +27,7 @@ public sealed class Transaction : UserOwnedEntity
     public Budget? Budget { get; private set; }
     public RecurringRule? RecurringRule { get; private set; }
     public ICollection<TransactionTag> Tags { get; private set; } = new List<TransactionTag>();
+    public ICollection<TransactionAttachment> Attachments { get; private set; } = new List<TransactionAttachment>();
 
     public ICollection<SavingGoalContribution> SavingGoalContributions { get; private set; } = new List<SavingGoalContribution>();
 

@@ -13,9 +13,14 @@ public sealed class DeleteTransactionHandler(IFinanzasMCPDbContext dbContext)
         var transaction = await dbContext.Set<Transaction>()
             .Include(x => x.Account)
             .Include(x => x.ToAccount)
+            .Include(x => x.Attachments)
             .FirstAsync(x => x.Id == command.Id, cancellationToken);
 
         Reverse(transaction);
+        foreach (var attachment in transaction.Attachments)
+        {
+            attachment.SoftDelete();
+        }
         transaction.SoftDelete();
         await dbContext.SaveChangesAsync(cancellationToken);
     }

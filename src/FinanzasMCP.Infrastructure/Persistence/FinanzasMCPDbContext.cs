@@ -28,6 +28,7 @@ public sealed class FinanzasMCPDbContext(
     public Guid? CurrentUserId => currentUser?.UserId;
 
     public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<UserApiKey> UserApiKeys => Set<UserApiKey>();
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<CryptoAccount> CryptoAccounts => Set<CryptoAccount>();
@@ -35,6 +36,7 @@ public sealed class FinanzasMCPDbContext(
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<TransactionTag> TransactionTags => Set<TransactionTag>();
+    public DbSet<TransactionAttachment> TransactionAttachments => Set<TransactionAttachment>();
     public DbSet<CryptoLot> CryptoLots => Set<CryptoLot>();
     public DbSet<RecurringRule> RecurringRules => Set<RecurringRule>();
     public DbSet<Budget> Budgets => Set<Budget>();

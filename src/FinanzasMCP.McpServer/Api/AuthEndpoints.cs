@@ -1,9 +1,13 @@
 using System.Security.Claims;
 using FinanzasMCP.Application.Auth;
+using FinanzasMCP.Application.Auth.Commands;
+using FinanzasMCP.Application.Auth.Handlers;
+using FinanzasMCP.Application.Auth.Queries;
 using FinanzasMCP.Application.Persistence;
 using FinanzasMCP.Domain.Users;
 using FinanzasMCP.McpServer.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FinanzasMCP.McpServer.Api;
 
@@ -129,6 +133,29 @@ public static class AuthEndpoints
                 ? Results.Ok(new AuthUserResponse(userId, email, name ?? email))
                 : Results.Unauthorized();
         }).RequireAuthorization();
+
+        var apiKeys = group.MapGroup("api-keys").RequireAuthorization();
+
+        apiKeys.MapGet("", async ([FromServices] GetUserApiKeysHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetUserApiKeysQuery(), ct)));
+
+        apiKeys.MapPost("", async (CreateApiKeyRequest request, [FromServices] CreateUserApiKeyHandler handler, CancellationToken ct) =>
+        {
+            var created = await handler.Handle(new CreateUserApiKeyCommand(request.Name), ct);
+            return Results.Created($"/api/v1/auth/api-keys/{created.Summary.Id}", created);
+        });
+
+        apiKeys.MapPost("{id:guid}/revoke", async (Guid id, [FromServices] RevokeUserApiKeyHandler handler, CancellationToken ct) =>
+        {
+            await handler.Handle(new RevokeUserApiKeyCommand(id), ct);
+            return Results.NoContent();
+        });
+
+        apiKeys.MapDelete("{id:guid}", async (Guid id, [FromServices] DeleteUserApiKeyHandler handler, CancellationToken ct) =>
+        {
+            await handler.Handle(new DeleteUserApiKeyCommand(id), ct);
+            return Results.NoContent();
+        });
     }
 
     private static AuthResponse CreateResponse(AppUser user, JwtTokenService tokenService)

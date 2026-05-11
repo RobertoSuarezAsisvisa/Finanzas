@@ -26,6 +26,7 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
             .Include(x => x.Account)
             .Include(x => x.ToAccount)
             .Include(x => x.Tags)
+            .Include(x => x.Attachments)
             .FirstAsync(x => x.Id == command.Id, cancellationToken);
 
         Revert(transaction);
@@ -54,7 +55,20 @@ public sealed class UpdateTransactionHandler(IFinanzasMCPDbContext dbContext)
         transaction.ReplaceTags(command.TagIds);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new TransactionSummary(transaction.Id, transaction.Type, transaction.Amount, transaction.Currency, transaction.AccountId, transaction.ToAccountId, transaction.CategoryId, transaction.BudgetId, transaction.Description, transaction.Reference, transaction.TransactionDate, transaction.Tags.Select(tag => tag.TagId).ToArray());
+        return new TransactionSummary(
+            transaction.Id,
+            transaction.Type,
+            transaction.Amount,
+            transaction.Currency,
+            transaction.AccountId,
+            transaction.ToAccountId,
+            transaction.CategoryId,
+            transaction.BudgetId,
+            transaction.Description,
+            transaction.Reference,
+            transaction.TransactionDate,
+            transaction.Tags.Select(tag => tag.TagId).ToArray(),
+            transaction.Attachments.Count(attachment => !attachment.IsDeleted));
     }
 
     private static void Revert(Transaction transaction)

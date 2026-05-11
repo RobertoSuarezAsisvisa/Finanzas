@@ -4,11 +4,13 @@ using FinanzasMCP.Infrastructure;
 using FinanzasMCP.Infrastructure.Persistence;
 using FinanzasMCP.McpServer.Api;
 using FinanzasMCP.McpServer.Auth;
+using FinanzasMCP.McpServer.Storage;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FinanzasMCP.McpServer.Tools;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using ModelContextProtocol.AspNetCore;
 using System.Text;
@@ -44,17 +46,51 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<TransactionAttachmentImageOptions>(
+    builder.Configuration.GetSection(TransactionAttachmentImageOptions.SectionName));
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddSingleton<ApiKeyTokenService>();
+builder.Services.AddSingleton<IApiKeyTokenService>(sp => sp.GetRequiredService<ApiKeyTokenService>());
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddSingleton<FirebaseAuthService>();
+builder.Services.AddSingleton<GoogleCredentialResolver>();
+builder.Services.AddSingleton<ITransactionAttachmentProcessor, TransactionAttachmentProcessor>();
+builder.Services.AddSingleton<ITransactionAttachmentStorage, TransactionAttachmentStorage>();
 builder.Services.AddScoped<LegacyDataClaimer>();
 
 var jwtSigningKey = builder.Configuration["Jwt:SigningKey"];
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = "DynamicAuth";
+        options.DefaultAuthenticateScheme = "DynamicAuth";
+        options.DefaultChallengeScheme = "DynamicAuth";
+    })
+    .AddPolicyScheme("DynamicAuth", "JWT or API key", options =>
+    {
+        options.ForwardDefaultSelector = context =>
+        {
+            if (context.Request.Headers.ContainsKey(ApiKeyAuthenticationDefaults.HeaderName))
+            {
+                return ApiKeyAuthenticationDefaults.Scheme;
+            }
+
+            var authorization = context.Request.Headers.Authorization.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(authorization) &&
+                authorization.StartsWith("ApiKey ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ApiKeyAuthenticationDefaults.Scheme;
+            }
+
+            return JwtBearerDefaults.AuthenticationScheme;
+        };
+    })
+    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationDefaults.Scheme, _ => { });
+
 if (!string.IsNullOrWhiteSpace(jwtSigningKey))
 {
-    builder.Services
-        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    builder.Services.AddAuthentication()
         .AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -110,7 +146,7 @@ if (!app.Environment.IsEnvironment("Testing"))
     dbContext.Database.Migrate();
 }
 
-app.MapMcp("/mcp");
+app.MapMcp("/mcp").RequireAuthorization();
 app.MapFinanzasRestApi();
 
 app.Run();
@@ -124,7 +160,7 @@ static void InitializeFirebase(IConfiguration configuration, IHostEnvironment en
         return;
     }
 
-    var credential = TryGetGoogleCredential(configuration);
+    var credential = new GoogleCredentialResolver(configuration).Resolve();
     if (credential is null)
     {
         return;
@@ -135,22 +171,4 @@ static void InitializeFirebase(IConfiguration configuration, IHostEnvironment en
         ProjectId = configuration["Firebase:ProjectId"],
         Credential = credential
     });
-}
-
-static GoogleCredential? TryGetGoogleCredential(IConfiguration configuration)
-{
-    try
-    {
-        var serviceAccountPath = configuration["Firebase:ServiceAccountPath"];
-        if (!string.IsNullOrWhiteSpace(serviceAccountPath))
-        {
-            return GoogleCredential.FromFile(Environment.ExpandEnvironmentVariables(serviceAccountPath));
-        }
-
-        return GoogleCredential.GetApplicationDefault();
-    }
-    catch
-    {
-        return null;
-    }
 }

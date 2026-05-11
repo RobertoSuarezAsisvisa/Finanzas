@@ -35,6 +35,7 @@ using FinanzasMCP.Application.UserContext.Commands;
 using FinanzasMCP.Application.UserContext.Queries;
 using FinanzasMCP.Application.Reports.Handlers;
 using FinanzasMCP.Application.Reports.Queries;
+using FinanzasMCP.Application.Auth.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FinanzasMCP.Application;
@@ -108,6 +109,10 @@ public static class DependencyInjection
         services.AddScoped<UpsertUserContextEntryHandler>();
         services.AddScoped<GetUserContextHandler>();
         services.AddScoped<DeleteUserContextEntryHandler>();
+        services.AddScoped<CreateUserApiKeyHandler>();
+        services.AddScoped<GetUserApiKeysHandler>();
+        services.AddScoped<RevokeUserApiKeyHandler>();
+        services.AddScoped<DeleteUserApiKeyHandler>();
         services.AddScoped<GetFinanceOverviewHandler>();
         return services;
     }

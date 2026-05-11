@@ -15,6 +15,7 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
         var transactions = dbContext.Set<Transaction>()
             .AsNoTracking()
             .Include(x => x.Tags)
+            .Include(x => x.Attachments)
             .AsQueryable();
 
         if (query.AccountId is not null)
@@ -69,7 +70,8 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
             x.Description,
             x.Reference,
             x.TransactionDate,
-            x.Tags.Select(tag => tag.TagId).ToArray())).ToArray();
+            x.Tags.Select(tag => tag.TagId).ToArray(),
+            x.Attachments.Count(attachment => attachment.DeletedAt == null))).ToArray();
 
         return new PagedResult<TransactionSummary>(items, totalCount, page, pageSize);
     }

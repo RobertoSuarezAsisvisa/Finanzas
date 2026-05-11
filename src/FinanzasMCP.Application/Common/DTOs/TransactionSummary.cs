@@ -14,4 +14,5 @@ public sealed record TransactionSummary(
     string? Description,
     string? Reference,
     DateTimeOffset TransactionDate,
-    IReadOnlyList<Guid> TagIds);
+    IReadOnlyList<Guid> TagIds,
+    int AttachmentCount);

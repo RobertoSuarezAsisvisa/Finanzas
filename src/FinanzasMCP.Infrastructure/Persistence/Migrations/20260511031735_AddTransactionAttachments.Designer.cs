@@ -3,6 +3,7 @@ using System;
 using FinanzasMCP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(FinanzasMCPDbContext))]
-    partial class FinanzasMCPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511031735_AddTransactionAttachments")]
+    partial class AddTransactionAttachments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1070,55 +1073,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Users.UserApiKey", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("LastUsedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LookupKey")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<DateTimeOffset?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SecretHash")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LookupKey")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("user_api_keys", (string)null);
-                });
-
             modelBuilder.Entity("FinanzasMCP.Domain.Users.UserExternalLogin", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1359,17 +1313,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Tag");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Users.UserApiKey", b =>
-                {
-                    b.HasOne("FinanzasMCP.Domain.Users.AppUser", "User")
-                        .WithMany("ApiKeys")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("FinanzasMCP.Domain.Users.UserExternalLogin", b =>
                 {
                     b.HasOne("FinanzasMCP.Domain.Users.AppUser", "User")
@@ -1429,8 +1372,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FinanzasMCP.Domain.Users.AppUser", b =>
                 {
-                    b.Navigation("ApiKeys");
-
                     b.Navigation("ExternalLogins");
                 });
 #pragma warning restore 612, 618

@@ -72,6 +72,7 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
             transaction.Description,
             transaction.Reference,
             transaction.TransactionDate,
-            transaction.Tags.Select(tag => tag.TagId).ToArray());
+            transaction.Tags.Select(tag => tag.TagId).ToArray(),
+            0);
     }
 }
