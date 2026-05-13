@@ -13,8 +13,20 @@ public sealed class GetFinanceOverviewHandler(IFinanzasMCPDbContext dbContext)
 {
     public async Task<FinanceOverviewSummary> Handle(GetFinanceOverviewQuery query, CancellationToken cancellationToken = default)
     {
-        var totalIncome = await dbContext.Set<Transaction>().Where(x => x.Type == TransactionType.Income).SumAsync(x => x.Amount, cancellationToken);
-        var totalExpenses = await dbContext.Set<Transaction>().Where(x => x.Type == TransactionType.Expense).SumAsync(x => x.Amount, cancellationToken);
+        var transactions = dbContext.Set<Transaction>().AsNoTracking().AsQueryable();
+
+        if (query.DateFrom is not null)
+        {
+            transactions = transactions.Where(x => x.TransactionDate >= query.DateFrom);
+        }
+
+        if (query.DateTo is not null)
+        {
+            transactions = transactions.Where(x => x.TransactionDate <= query.DateTo);
+        }
+
+        var totalIncome = await transactions.Where(x => x.Type == TransactionType.Income).SumAsync(x => x.Amount, cancellationToken);
+        var totalExpenses = await transactions.Where(x => x.Type == TransactionType.Expense).SumAsync(x => x.Amount, cancellationToken);
         var totalAssets = await dbContext.Accounts.Where(x => x.IsActive).SumAsync(x => x.Balance, cancellationToken);
         var totalDebts = await dbContext.Set<Debt>()
             .Where(x => x.Type == DebtType.Payable && x.Status == DebtStatus.Active)

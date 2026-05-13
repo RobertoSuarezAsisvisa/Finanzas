@@ -34,7 +34,7 @@ public static class ContextAndReportEndpoints
 
     private static void MapReports(RouteGroupBuilder group)
     {
-        group.MapGet("finance-overview", async (GetFinanceOverviewHandler handler, CancellationToken ct) =>
-            Results.Ok(await handler.Handle(new GetFinanceOverviewQuery(), ct)));
+        group.MapGet("finance-overview", async (DateTimeOffset? dateFrom, DateTimeOffset? dateTo, GetFinanceOverviewHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetFinanceOverviewQuery(dateFrom, dateTo), ct)));
     }
 }

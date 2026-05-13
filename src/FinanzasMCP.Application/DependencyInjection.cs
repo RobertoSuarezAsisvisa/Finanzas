@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<DeleteTagHandler>();
         services.AddScoped<CreateTransactionHandler>();
         services.AddScoped<GetTransactionsHandler>();
+        services.AddScoped<GetTransactionTotalsHandler>();
         services.AddScoped<UpdateTransactionHandler>();
         services.AddScoped<DeleteTransactionHandler>();
         services.AddScoped<CreateBudgetHandler>();

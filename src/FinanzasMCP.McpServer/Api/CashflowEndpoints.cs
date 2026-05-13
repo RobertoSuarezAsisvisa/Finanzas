@@ -26,6 +26,9 @@ public static class CashflowEndpoints
         group.MapGet("", async (Guid? accountId, TransactionType? type, Guid? categoryId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, int? page, int? pageSize, GetTransactionsHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.Handle(new GetTransactionsQuery(accountId, type, categoryId, dateFrom, dateTo, search, page ?? 1, pageSize ?? 10), ct)));
 
+        group.MapGet("summary", async (Guid? accountId, TransactionType? type, Guid? categoryId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, GetTransactionTotalsHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetTransactionTotalsQuery(accountId, type, categoryId, dateFrom, dateTo, search), ct)));
+
         group.MapGet("{id:guid}/attachments", async (Guid id, HttpContext httpContext, IFinanzasMCPDbContext dbContext, CancellationToken ct) =>
         {
             var exists = await dbContext.Set<Transaction>().AnyAsync(x => x.Id == id, ct);

@@ -9,6 +9,9 @@ namespace FinanzasMCP.McpServer.Tools;
 public sealed class ReportTools(GetFinanceOverviewHandler getFinanceOverviewHandler)
 {
     [McpServerTool, System.ComponentModel.Description("Returns a high-level financial overview.")]
-    public Task<FinanceOverviewSummary> GetFinanceOverview(CancellationToken cancellationToken = default)
-        => getFinanceOverviewHandler.Handle(new GetFinanceOverviewQuery(), cancellationToken);
+    public Task<FinanceOverviewSummary> GetFinanceOverview(
+        DateTimeOffset? dateFrom = null,
+        DateTimeOffset? dateTo = null,
+        CancellationToken cancellationToken = default)
+        => getFinanceOverviewHandler.Handle(new GetFinanceOverviewQuery(dateFrom, dateTo), cancellationToken);
 }

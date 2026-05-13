@@ -11,7 +11,7 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
     public async Task<PagedResult<TransactionSummary>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken = default)
     {
         var page = Math.Max(1, query.Page);
-        var pageSize = Math.Clamp(query.PageSize, 1, 100);
+        var pageSize = Math.Clamp(query.PageSize, 1, 1000);
         var transactions = dbContext.Set<Transaction>()
             .AsNoTracking()
             .Include(x => x.Tags)
