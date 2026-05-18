@@ -30,7 +30,9 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Neon"] = "Data Source=:memory:",
-                ["OpenAIApps:DomainVerificationToken"] = "test-openai-apps-challenge"
+                ["OpenAIApps:DomainVerificationToken"] = "test-openai-apps-challenge",
+                ["OAuth:Authority"] = "https://auth.example.com/",
+                ["OAuth:Audience"] = "https://finanzas-mcp"
             });
         });
 

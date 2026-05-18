@@ -48,6 +48,24 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task OAuth_protected_resource_metadata_advertises_auth0_and_scopes()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/.well-known/oauth-protected-resource/mcp");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var document = JsonDocument.Parse(body);
+        var root = document.RootElement;
+        Assert.Equal("https://auth.example.com/", root.GetProperty("authorization_servers")[0].GetString());
+        Assert.Equal("finance:read", root.GetProperty("scopes_supported")[3].GetString());
+        Assert.Equal("finance:write", root.GetProperty("scopes_supported")[4].GetString());
+        Assert.Equal("header", root.GetProperty("bearer_methods_supported")[0].GetString());
+    }
+
+    [Fact]
     public async Task Cors_allows_any_origin()
     {
         factory.InitializeDatabase();

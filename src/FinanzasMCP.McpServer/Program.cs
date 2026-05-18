@@ -190,6 +190,7 @@ app.UseCors(CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<McpOAuthScopeMiddleware>();
+app.UseMiddleware<McpOAuthChallengeMiddleware>();
 
 InitializeFirebase(builder.Configuration, app.Environment);
 
@@ -208,6 +209,7 @@ app.MapGet("/.well-known/openai-apps-challenge", (IConfiguration configuration) 
         : Results.Text(token, "text/plain");
 }).AllowAnonymous();
 
+app.MapOAuthMetadataEndpoints();
 app.MapMcp("/mcp").RequireAuthorization();
 app.MapFinanzasRestApi();
 
