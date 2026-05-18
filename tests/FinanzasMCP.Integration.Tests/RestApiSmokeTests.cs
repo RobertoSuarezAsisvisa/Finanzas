@@ -34,6 +34,20 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task OpenAI_apps_challenge_endpoint_returns_configured_token()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/.well-known/openai-apps-challenge");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("test-openai-apps-challenge", body);
+    }
+
+    [Fact]
     public async Task Cors_allows_any_origin()
     {
         factory.InitializeDatabase();
