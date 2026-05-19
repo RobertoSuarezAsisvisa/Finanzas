@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using ModelContextProtocol.AspNetCore;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -59,13 +58,8 @@ builder.Services.AddSingleton<GoogleCredentialResolver>();
 builder.Services.AddSingleton<ITransactionAttachmentProcessor, TransactionAttachmentProcessor>();
 builder.Services.AddSingleton<ITransactionAttachmentStorage, TransactionAttachmentStorage>();
 builder.Services.AddScoped<LegacyDataClaimer>();
-builder.Services.AddScoped<OAuthUserMapper>();
 
 var jwtSigningKey = builder.Configuration["Jwt:SigningKey"];
-var oauthAuthority = NormalizeAuthority(builder.Configuration["OAuth:Authority"]);
-var oauthAudience = builder.Configuration["OAuth:Audience"];
-var hasOAuthConfiguration = !string.IsNullOrWhiteSpace(oauthAuthority) &&
-    !string.IsNullOrWhiteSpace(oauthAudience);
 
 builder.Services
     .AddAuthentication(options =>
@@ -90,13 +84,6 @@ builder.Services
                 return ApiKeyAuthenticationDefaults.Scheme;
             }
 
-            if (hasOAuthConfiguration &&
-                TryGetBearerToken(authorization, out var bearerToken) &&
-                TokenIssuerMatches(bearerToken, oauthAuthority))
-            {
-                return AuthSchemeNames.OAuthBearer;
-            }
-
             return AuthSchemeNames.AppJwtBearer;
         };
     })
@@ -117,45 +104,6 @@ if (!string.IsNullOrWhiteSpace(jwtSigningKey))
                 ValidAudience = builder.Configuration["Jwt:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
                 ClockSkew = TimeSpan.FromMinutes(1)
-            };
-        });
-}
-
-if (hasOAuthConfiguration)
-{
-    builder.Services.AddAuthentication()
-        .AddJwtBearer(AuthSchemeNames.OAuthBearer, options =>
-        {
-            options.Authority = oauthAuthority;
-            options.Audience = oauthAudience;
-            options.MapInboundClaims = false;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = oauthAuthority,
-                ValidateAudience = true,
-                ValidAudience = oauthAudience,
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true,
-                NameClaimType = "name",
-                RoleClaimType = "permissions",
-                ClockSkew = TimeSpan.FromMinutes(1)
-            };
-            options.Events = new JwtBearerEvents
-            {
-                OnTokenValidated = async context =>
-                {
-                    try
-                    {
-                        var mapper = context.HttpContext.RequestServices.GetRequiredService<OAuthUserMapper>();
-                        var principal = await mapper.MapAsync(context.Principal!, context.HttpContext.RequestAborted);
-                        context.Principal = principal;
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        context.Fail(ex);
-                    }
-                }
             };
         });
 }
@@ -189,8 +137,6 @@ app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseCors(CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<McpOAuthScopeMiddleware>();
-app.UseMiddleware<McpOAuthChallengeMiddleware>();
 
 InitializeFirebase(builder.Configuration, app.Environment);
 
@@ -209,7 +155,6 @@ app.MapGet("/.well-known/openai-apps-challenge", (IConfiguration configuration) 
         : Results.Text(token, "text/plain");
 }).AllowAnonymous();
 
-app.MapOAuthMetadataEndpoints();
 app.MapMcp("/mcp").RequireAuthorization();
 app.MapFinanzasRestApi();
 
@@ -235,45 +180,4 @@ static void InitializeFirebase(IConfiguration configuration, IHostEnvironment en
         ProjectId = configuration["Firebase:ProjectId"],
         Credential = credential
     });
-}
-
-static bool TryGetBearerToken(string? authorization, out string token)
-{
-    token = string.Empty;
-    if (string.IsNullOrWhiteSpace(authorization) ||
-        !authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-    {
-        return false;
-    }
-
-    token = authorization["Bearer ".Length..].Trim();
-    return token.Length > 0;
-}
-
-static bool TokenIssuerMatches(string token, string? expectedIssuer)
-{
-    if (string.IsNullOrWhiteSpace(expectedIssuer))
-    {
-        return false;
-    }
-
-    try
-    {
-        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        return string.Equals(NormalizeAuthority(jwt.Issuer), expectedIssuer, StringComparison.OrdinalIgnoreCase);
-    }
-    catch (ArgumentException)
-    {
-        return false;
-    }
-}
-
-static string? NormalizeAuthority(string? authority)
-{
-    if (string.IsNullOrWhiteSpace(authority))
-    {
-        return null;
-    }
-
-    return authority.Trim().TrimEnd('/') + "/";
 }

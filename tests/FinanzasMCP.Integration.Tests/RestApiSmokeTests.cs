@@ -48,24 +48,6 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
-    public async Task OAuth_protected_resource_metadata_advertises_auth0_and_scopes()
-    {
-        factory.InitializeDatabase();
-        var client = factory.CreateClient();
-
-        var response = await client.GetAsync("/.well-known/oauth-protected-resource/mcp");
-        var body = await response.Content.ReadAsStringAsync();
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        using var document = JsonDocument.Parse(body);
-        var root = document.RootElement;
-        Assert.Equal("https://auth.example.com/", root.GetProperty("authorization_servers")[0].GetString());
-        Assert.Equal("finance:read", root.GetProperty("scopes_supported")[3].GetString());
-        Assert.Equal("finance:write", root.GetProperty("scopes_supported")[4].GetString());
-        Assert.Equal("header", root.GetProperty("bearer_methods_supported")[0].GetString());
-    }
-
-    [Fact]
     public async Task Cors_allows_any_origin()
     {
         factory.InitializeDatabase();
@@ -367,6 +349,40 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         Assert.NotNull(accounts);
         Assert.Contains(accounts!, x => x.Id == ownerAccount.Id);
         Assert.DoesNotContain(accounts!, x => x.Id == otherAccount.Id);
+    }
+
+    [Fact]
+    public async Task Mcp_accepts_x_api_key_header()
+    {
+        factory.InitializeDatabase();
+
+        var ownerClient = factory.CreateClient();
+        await AuthenticateAsync(ownerClient);
+        var ownerAccount = await CreateAccountAsync(ownerClient, "Cuenta MCP API Key");
+        var apiKey = await CreateApiKeyAsync(ownerClient, "Servidor MCP");
+
+        var mcpClient = factory.CreateClient();
+        mcpClient.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+        mcpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        mcpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+        var response = await mcpClient.PostAsJsonAsync("/mcp", new
+        {
+            jsonrpc = "2.0",
+            id = 1,
+            method = "tools/call",
+            @params = new
+            {
+                name = "list_accounts",
+                arguments = new { }
+            }
+        });
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.True(response.IsSuccessStatusCode, body);
+        Assert.Empty(response.Headers.WwwAuthenticate);
+        Assert.Contains(ownerAccount.Id.ToString(), body);
+        Assert.Contains(ownerAccount.Name, body);
     }
 
     [Fact]
