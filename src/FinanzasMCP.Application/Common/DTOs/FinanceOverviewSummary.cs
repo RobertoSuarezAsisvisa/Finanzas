@@ -6,5 +6,4 @@ public sealed record FinanceOverviewSummary(
     decimal NetBalance,
     decimal TotalAssets,
     decimal TotalDebts,
-    decimal SavingGoalsProgress,
-    decimal PurchaseGoalsProgress);
+    decimal GoalsProgress);

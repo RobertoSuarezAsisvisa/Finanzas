@@ -29,7 +29,7 @@ public sealed class Transaction : UserOwnedEntity
     public ICollection<TransactionTag> Tags { get; private set; } = new List<TransactionTag>();
     public ICollection<TransactionAttachment> Attachments { get; private set; } = new List<TransactionAttachment>();
 
-    public ICollection<SavingGoalContribution> SavingGoalContributions { get; private set; } = new List<SavingGoalContribution>();
+    public ICollection<FinancialGoalContribution> FinancialGoalContributions { get; private set; } = new List<FinancialGoalContribution>();
 
     public void ReplaceTags(IEnumerable<Guid> tagIds)
     {

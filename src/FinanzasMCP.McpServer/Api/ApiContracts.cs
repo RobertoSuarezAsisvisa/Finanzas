@@ -90,6 +90,11 @@ public sealed record UpdateSavingGoalRequest(string Name, decimal TargetAmount, 
 public sealed record AddSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 public sealed record UpdateSavingGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
 
+public sealed record CreateFinancialGoalRequest(string Name, decimal TargetAmount, FinancialGoalType Type, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate);
+public sealed record UpdateFinancialGoalRequest(string Name, decimal TargetAmount, FinancialGoalType Type, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate, FinancialGoalStatus? Status, DateTimeOffset? CompletedAt);
+public sealed record AddFinancialGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
+public sealed record UpdateFinancialGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);
+
 public sealed record CreatePurchaseGoalRequest(string Name, decimal TargetPrice, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate);
 public sealed record UpdatePurchaseGoalRequest(string Name, decimal TargetPrice, string? Description, int Priority, string? Url, Guid? AccountId, DateTimeOffset? TargetDate, PurchaseGoalStatus? Status, DateTimeOffset? PurchasedAt);
 public sealed record AddPurchaseGoalContributionRequest(decimal Amount, DateTimeOffset ContributionDate, Guid? TransactionId, Guid? AccountId);

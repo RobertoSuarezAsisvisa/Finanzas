@@ -3,6 +3,11 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using FinanzasMCP.Application.Common.DTOs;
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.Goals;
+using FinanzasMCP.Domain.Shopping;
+using FinanzasMCP.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -180,6 +185,152 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task Financial_goal_flow_works_through_new_rest_api()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        await AuthenticateAsync(client);
+        var sourceAccount = await CreateAccountAsync(client, "Cuenta objetivos");
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/goals", new
+        {
+            name = "Fondo de emergencia",
+            targetAmount = 1000m,
+            type = FinancialGoalType.Saving,
+            description = "Reserva",
+            priority = 1,
+            url = (string?)null,
+            accountId = (Guid?)null,
+            targetDate = DateTimeOffset.UtcNow.AddMonths(6)
+        });
+        var createBody = await createResponse.Content.ReadAsStringAsync();
+        Assert.True(createResponse.IsSuccessStatusCode, createBody);
+        var goal = JsonSerializer.Deserialize<FinancialGoalTestResponse>(createBody, JsonOptions);
+        Assert.NotNull(goal);
+        Assert.Equal(FinancialGoalType.Saving, goal!.Type);
+
+        var contributionResponse = await client.PostAsJsonAsync($"/api/v1/goals/{goal.Id}/contributions", new
+        {
+            amount = 125m,
+            contributionDate = DateTimeOffset.UtcNow,
+            transactionId = (Guid?)null,
+            accountId = sourceAccount.Id
+        });
+        var contributionBody = await contributionResponse.Content.ReadAsStringAsync();
+        Assert.True(contributionResponse.IsSuccessStatusCode, contributionBody);
+        var contributed = JsonSerializer.Deserialize<FinancialGoalTestResponse>(contributionBody, JsonOptions);
+        Assert.NotNull(contributed);
+        Assert.Equal(125m, contributed!.CurrentAmount);
+
+        var contributions = await client.GetFromJsonAsync<FinancialGoalContributionTestResponse[]>($"/api/v1/goal-contributions?goalId={goal.Id}", JsonOptions);
+        Assert.NotNull(contributions);
+        Assert.Single(contributions!);
+        Assert.Equal(125m, contributions[0].Amount);
+    }
+
+    [Fact]
+    public async Task Updating_migrated_goal_contribution_creates_missing_transaction()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        var auth = await AuthenticateAsync(client);
+        var sourceAccount = await CreateAccountAsync(client, "Cuenta aporte migrado");
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/goals", new
+        {
+            name = "Meta migrada",
+            targetAmount = 500m,
+            type = FinancialGoalType.Saving,
+            description = (string?)null,
+            priority = 1,
+            url = (string?)null,
+            accountId = (Guid?)null,
+            targetDate = (DateTimeOffset?)null
+        });
+        var createBody = await createResponse.Content.ReadAsStringAsync();
+        Assert.True(createResponse.IsSuccessStatusCode, createBody);
+        var goal = JsonSerializer.Deserialize<FinancialGoalTestResponse>(createBody, JsonOptions);
+        Assert.NotNull(goal);
+
+        var contributionId = Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        using (var scope = factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<FinanzasMCPDbContext>();
+            await dbContext.Database.ExecuteSqlInterpolatedAsync($"""
+                INSERT INTO financial_goal_contributions
+                    ("Id", "GoalId", "TransactionId", "Amount", "ContributionDate", "CreatedAt", "UpdatedAt", "DeletedAt", "UserId")
+                VALUES
+                    ({contributionId}, {goal!.Id}, NULL, {25m}, {now}, {now}, {now}, NULL, {auth.User.Id})
+                """);
+        }
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/goal-contributions/{contributionId}", new
+        {
+            amount = 40m,
+            contributionDate = now.AddDays(1),
+            transactionId = (Guid?)null,
+            accountId = sourceAccount.Id
+        });
+        var updateBody = await updateResponse.Content.ReadAsStringAsync();
+        Assert.True(updateResponse.IsSuccessStatusCode, updateBody);
+
+        var contributions = await client.GetFromJsonAsync<FinancialGoalContributionTestResponse[]>($"/api/v1/goal-contributions?goalId={goal.Id}", JsonOptions);
+        Assert.NotNull(contributions);
+        var updatedContribution = Assert.Single(contributions!);
+        Assert.NotNull(updatedContribution.TransactionId);
+        Assert.Equal(sourceAccount.Id, updatedContribution.AccountId);
+        Assert.Equal(40m, updatedContribution.Amount);
+
+        var accounts = await client.GetFromJsonAsync<AccountSummary[]>("/api/v1/accounts", JsonOptions);
+        Assert.NotNull(accounts);
+        Assert.Equal(210m, accounts!.Single(x => x.Id == sourceAccount.Id).Balance);
+    }
+
+    [Fact]
+    public async Task Legacy_goal_routes_use_unified_model()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        await AuthenticateAsync(client);
+
+        var savingResponse = await client.PostAsJsonAsync("/api/v1/saving-goals", new
+        {
+            name = "Viaje",
+            targetAmount = 800m,
+            accountId = (Guid?)null,
+            targetDate = (DateTimeOffset?)null
+        });
+        var savingBody = await savingResponse.Content.ReadAsStringAsync();
+        Assert.True(savingResponse.IsSuccessStatusCode, savingBody);
+        var saving = JsonSerializer.Deserialize<FinancialGoalTestResponse>(savingBody, JsonOptions);
+        Assert.NotNull(saving);
+        Assert.Equal(FinancialGoalType.Saving, saving!.Type);
+
+        var purchaseResponse = await client.PostAsJsonAsync("/api/v1/purchase-goals", new
+        {
+            name = "Laptop",
+            targetPrice = 1500m,
+            description = "Trabajo",
+            priority = 2,
+            url = "https://example.com/laptop",
+            accountId = (Guid?)null,
+            targetDate = (DateTimeOffset?)null
+        });
+        var purchaseBody = await purchaseResponse.Content.ReadAsStringAsync();
+        Assert.True(purchaseResponse.IsSuccessStatusCode, purchaseBody);
+        var purchase = JsonSerializer.Deserialize<FinancialGoalTestResponse>(purchaseBody, JsonOptions);
+        Assert.NotNull(purchase);
+        Assert.Equal(FinancialGoalType.Purchase, purchase!.Type);
+        Assert.Equal("https://example.com/laptop", purchase.Url);
+
+        var goals = await client.GetFromJsonAsync<FinancialGoalTestResponse[]>("/api/v1/goals", JsonOptions);
+        Assert.NotNull(goals);
+        Assert.Contains(goals!, x => x.Id == saving.Id);
+        Assert.Contains(goals!, x => x.Id == purchase.Id);
+    }
+
+    [Fact]
     public async Task Transaction_supports_attachment_upload_and_listing()
     {
         factory.InitializeDatabase();
@@ -352,6 +503,83 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task Shopping_crud_and_recommendation_flow_works()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        await AuthenticateAsync(client);
+
+        var tutti = await CreateShoppingStoreAsync(client, "Tutti");
+        var supermaxi = await CreateShoppingStoreAsync(client, "Supermaxi");
+        var product = await CreateShoppingProductAsync(client, "Huevos");
+        var variant = await CreateShoppingVariantAsync(client, product.Id, "Huevos grandes x12", 12m, ShoppingUnit.Unit);
+
+        await client.PostAsJsonAsync("/api/v1/shopping/prices", new
+        {
+            storeId = tutti.Id,
+            productVariantId = variant.Id,
+            totalPrice = 2.40m,
+            normalizedQuantity = 12m,
+            unit = ShoppingUnit.Unit,
+            observedAt = DateTimeOffset.UtcNow,
+            notes = (string?)null
+        });
+        await client.PostAsJsonAsync("/api/v1/shopping/prices", new
+        {
+            storeId = supermaxi.Id,
+            productVariantId = variant.Id,
+            totalPrice = 3.00m,
+            normalizedQuantity = 12m,
+            unit = ShoppingUnit.Unit,
+            observedAt = DateTimeOffset.UtcNow,
+            notes = (string?)null
+        });
+
+        var listResponse = await client.PostAsJsonAsync("/api/v1/shopping/lists", new
+        {
+            name = "Lista prueba",
+            listDate = DateTimeOffset.UtcNow,
+            transactionId = (Guid?)null,
+            items = new[]
+            {
+                new { productVariantId = variant.Id, desiredQuantity = 12m, unit = ShoppingUnit.Unit, notes = (string?)null }
+            }
+        });
+        var listBody = await listResponse.Content.ReadAsStringAsync();
+        Assert.True(listResponse.IsSuccessStatusCode, listBody);
+        var list = JsonSerializer.Deserialize<ShoppingListTestResponse>(listBody, JsonOptions);
+        Assert.NotNull(list);
+
+        var recommendation = await client.GetFromJsonAsync<ShoppingRecommendationTestResponse>($"/api/v1/shopping/lists/{list!.Id}/recommendation", JsonOptions);
+
+        Assert.NotNull(recommendation);
+        var group = Assert.Single(recommendation!.StoreGroups);
+        Assert.Equal(tutti.Id, group.StoreId);
+        Assert.Equal(2.40m, group.Subtotal);
+        Assert.Equal(0.60m, recommendation.EstimatedSavings);
+    }
+
+    [Fact]
+    public async Task Shopping_data_is_scoped_to_authenticated_user()
+    {
+        factory.InitializeDatabase();
+
+        var ownerClient = factory.CreateClient();
+        await AuthenticateAsync(ownerClient);
+        var ownerStore = await CreateShoppingStoreAsync(ownerClient, "Owner Store");
+
+        var otherClient = factory.CreateClient();
+        await AuthenticateAsync(otherClient);
+        await CreateShoppingStoreAsync(otherClient, "Other Store");
+
+        var ownerStores = await ownerClient.GetFromJsonAsync<ShoppingStoreTestResponse[]>("/api/v1/shopping/stores", JsonOptions);
+
+        Assert.NotNull(ownerStores);
+        Assert.Contains(ownerStores!, x => x.Id == ownerStore.Id);
+        Assert.DoesNotContain(ownerStores!, x => x.Name == "Other Store");
+    }
+
+    [Fact]
     public async Task Mcp_accepts_x_api_key_header()
     {
         factory.InitializeDatabase();
@@ -408,7 +636,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         Assert.Equal(HttpStatusCode.Unauthorized, rejectedResponse.StatusCode);
     }
 
-    private static async Task AuthenticateAsync(HttpClient client)
+    private static async Task<AuthTestResponse> AuthenticateAsync(HttpClient client)
     {
         var email = $"test-{Guid.NewGuid():N}@finanzas.local";
         var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
@@ -418,10 +646,12 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
             displayName = "Test User"
         });
 
-        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, body);
         var auth = await response.Content.ReadFromJsonAsync<AuthTestResponse>(JsonOptions);
         Assert.NotNull(auth);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
+        return auth;
     }
 
     private async Task<AccountSummary> CreateAccountAsync(HttpClient client, string name)
@@ -451,6 +681,36 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     {
         var created = await CreateApiKeyIdAsync(client, name);
         return created.PlainTextKey;
+    }
+
+    private async Task<ShoppingStoreTestResponse> CreateShoppingStoreAsync(HttpClient client, string name)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/shopping/stores", new { name, notes = (string?)null });
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, body);
+        var store = JsonSerializer.Deserialize<ShoppingStoreTestResponse>(body, JsonOptions);
+        Assert.NotNull(store);
+        return store!;
+    }
+
+    private async Task<ShoppingProductTestResponse> CreateShoppingProductAsync(HttpClient client, string name)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/shopping/products", new { name, categoryId = (Guid?)null, notes = (string?)null });
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, body);
+        var product = JsonSerializer.Deserialize<ShoppingProductTestResponse>(body, JsonOptions);
+        Assert.NotNull(product);
+        return product!;
+    }
+
+    private async Task<ShoppingVariantTestResponse> CreateShoppingVariantAsync(HttpClient client, Guid productId, string name, decimal quantity, ShoppingUnit unit)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/shopping/variants", new { productId, name, normalizedQuantity = quantity, unit, barcode = (string?)null });
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, body);
+        var variant = JsonSerializer.Deserialize<ShoppingVariantTestResponse>(body, JsonOptions);
+        Assert.NotNull(variant);
+        return variant!;
     }
 
     private async Task<(string Id, string PlainTextKey)> CreateApiKeyIdAsync(HttpClient client, string name)
@@ -497,4 +757,12 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     private sealed record AuthTestUser(Guid Id, string Email, string DisplayName);
     private sealed record ApiKeySummaryResponse(string Id, string Name, string Preview, DateTimeOffset CreatedAt, DateTimeOffset? LastUsedAt, DateTimeOffset? RevokedAt, bool IsRevoked);
     private sealed record ApiKeyCreatedResponse(string ApiKey, ApiKeySummaryResponse Summary);
+    private sealed record FinancialGoalTestResponse(Guid Id, string Name, string? Description, decimal TargetAmount, decimal CurrentAmount, FinancialGoalType Type, FinancialGoalStatus Status, int Priority, string? Url);
+    private sealed record FinancialGoalContributionTestResponse(Guid Id, Guid GoalId, Guid? TransactionId, Guid? AccountId, decimal Amount, DateTimeOffset ContributionDate);
+    private sealed record ShoppingStoreTestResponse(Guid Id, string Name, string? Notes);
+    private sealed record ShoppingProductTestResponse(Guid Id, string Name, Guid? CategoryId, string? Notes);
+    private sealed record ShoppingVariantTestResponse(Guid Id, Guid ProductId, string ProductName, string Name, decimal NormalizedQuantity, ShoppingUnit Unit, string? Barcode);
+    private sealed record ShoppingListTestResponse(Guid Id, string Name, DateTimeOffset ListDate);
+    private sealed record ShoppingRecommendationTestResponse(Guid ShoppingListId, decimal EstimatedTotal, decimal EstimatedSavings, IReadOnlyList<ShoppingRecommendationGroupTestResponse> StoreGroups);
+    private sealed record ShoppingRecommendationGroupTestResponse(Guid StoreId, string StoreName, decimal Subtotal);
 }

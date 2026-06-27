@@ -1,7 +1,7 @@
 using FinanzasMCP.Application.Common.DTOs;
-using FinanzasMCP.Application.SavingGoals.Commands;
-using FinanzasMCP.Application.SavingGoals.Handlers;
-using FinanzasMCP.Application.SavingGoals.Queries;
+using FinanzasMCP.Application.Goals.Commands;
+using FinanzasMCP.Application.Goals.Handlers;
+using FinanzasMCP.Application.Goals.Queries;
 using FinanzasMCP.Domain.Goals;
 using ModelContextProtocol.Server;
 
@@ -9,29 +9,39 @@ namespace FinanzasMCP.McpServer.Tools;
 
 [McpServerToolType]
 public sealed class SavingGoalTools(
-    GetSavingGoalsHandler getSavingGoalsHandler,
-    CreateSavingGoalHandler createSavingGoalHandler,
-    AddSavingGoalContributionHandler addSavingGoalContributionHandler,
-    UpdateSavingGoalHandler updateSavingGoalHandler,
-    DeleteSavingGoalHandler deleteSavingGoalHandler)
+    GetFinancialGoalsHandler getGoalsHandler,
+    CreateFinancialGoalHandler createGoalHandler,
+    AddFinancialGoalContributionHandler addContributionHandler,
+    UpdateFinancialGoalHandler updateGoalHandler,
+    DeleteFinancialGoalHandler deleteGoalHandler)
 {
-    [McpServerTool, System.ComponentModel.Description("Lists saving goals.")]
-    public Task<IReadOnlyList<SavingGoalSummary>> ListSavingGoals(CancellationToken cancellationToken = default)
-        => getSavingGoalsHandler.Handle(new GetSavingGoalsQuery(), cancellationToken);
+    [McpServerTool, System.ComponentModel.Description("Deprecated. Lists saving financial goals.")]
+    public Task<IReadOnlyList<FinancialGoalSummary>> ListSavingGoals(CancellationToken cancellationToken = default)
+        => getGoalsHandler.Handle(new GetFinancialGoalsQuery(FinancialGoalType.Saving), cancellationToken);
 
-    [McpServerTool, System.ComponentModel.Description("Creates a saving goal.")]
-    public Task<SavingGoalSummary> CreateSavingGoal(string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, CancellationToken cancellationToken = default)
-        => createSavingGoalHandler.Handle(new CreateSavingGoalCommand(name, targetAmount, accountId, targetDate), cancellationToken);
+    [McpServerTool, System.ComponentModel.Description("Deprecated. Creates a saving financial goal.")]
+    public Task<FinancialGoalSummary> CreateSavingGoal(string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, CancellationToken cancellationToken = default)
+        => createGoalHandler.Handle(new CreateFinancialGoalCommand(name, targetAmount, FinancialGoalType.Saving, AccountId: accountId, TargetDate: targetDate), cancellationToken);
 
-    [McpServerTool, System.ComponentModel.Description("Adds a contribution to a saving goal.")]
-    public Task<SavingGoalSummary> AddContribution(Guid goalId, decimal amount, DateTimeOffset contributionDate, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
-        => addSavingGoalContributionHandler.Handle(new AddSavingGoalContributionCommand(goalId, amount, contributionDate, transactionId, accountId), cancellationToken);
+    [McpServerTool, System.ComponentModel.Description("Deprecated. Adds a contribution to a saving financial goal.")]
+    public Task<FinancialGoalSummary> AddContribution(Guid goalId, decimal amount, DateTimeOffset contributionDate, Guid? accountId = null, Guid? transactionId = null, CancellationToken cancellationToken = default)
+        => addContributionHandler.Handle(new AddFinancialGoalContributionCommand(goalId, amount, contributionDate, transactionId, accountId), cancellationToken);
 
-    [McpServerTool, System.ComponentModel.Description("Updates a saving goal.")]
-    public Task<SavingGoalSummary> UpdateSavingGoal(Guid id, string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, SavingGoalStatus? status = null, CancellationToken cancellationToken = default)
-        => updateSavingGoalHandler.Handle(new UpdateSavingGoalCommand(id, name, targetAmount, accountId, targetDate, status), cancellationToken);
+    [McpServerTool, System.ComponentModel.Description("Deprecated. Updates a saving financial goal.")]
+    public Task<FinancialGoalSummary> UpdateSavingGoal(Guid id, string name, decimal targetAmount, Guid? accountId = null, DateTimeOffset? targetDate = null, SavingGoalStatus? status = null, CancellationToken cancellationToken = default)
+        => updateGoalHandler.Handle(new UpdateFinancialGoalCommand(id, name, targetAmount, FinancialGoalType.Saving, AccountId: accountId, TargetDate: targetDate, Status: MapStatus(status)), cancellationToken);
 
-    [McpServerTool, System.ComponentModel.Description("Logically deletes a saving goal.")]
+    [McpServerTool, System.ComponentModel.Description("Deprecated. Logically deletes a saving financial goal.")]
     public Task DeleteSavingGoal(Guid id, CancellationToken cancellationToken = default)
-        => deleteSavingGoalHandler.Handle(new DeleteSavingGoalCommand(id), cancellationToken);
+        => deleteGoalHandler.Handle(new DeleteFinancialGoalCommand(id), cancellationToken);
+
+    private static FinancialGoalStatus? MapStatus(SavingGoalStatus? status)
+        => status switch
+        {
+            null => null,
+            SavingGoalStatus.InProgress => FinancialGoalStatus.InProgress,
+            SavingGoalStatus.Completed => FinancialGoalStatus.Completed,
+            SavingGoalStatus.Cancelled => FinancialGoalStatus.Cancelled,
+            _ => throw new InvalidOperationException("Unsupported saving goal status.")
+        };
 }

@@ -7,6 +7,7 @@ using FinanzasMCP.Domain.Crypto;
 using FinanzasMCP.Domain.Debts;
 using FinanzasMCP.Domain.Goals;
 using FinanzasMCP.Domain.Recurring;
+using FinanzasMCP.Domain.Shopping;
 using FinanzasMCP.Domain.Tags;
 using FinanzasMCP.Domain.Transactions;
 using FinanzasMCP.Domain.UserContext;
@@ -40,15 +41,21 @@ public sealed class FinanzasMCPDbContext(
     public DbSet<CryptoLot> CryptoLots => Set<CryptoLot>();
     public DbSet<RecurringRule> RecurringRules => Set<RecurringRule>();
     public DbSet<Budget> Budgets => Set<Budget>();
-    public DbSet<SavingGoal> SavingGoals => Set<SavingGoal>();
-    public DbSet<SavingGoalContribution> SavingGoalContributions => Set<SavingGoalContribution>();
-    public DbSet<PurchaseGoal> PurchaseGoals => Set<PurchaseGoal>();
-    public DbSet<PurchaseGoalContribution> PurchaseGoalContributions => Set<PurchaseGoalContribution>();
+    public DbSet<FinancialGoal> FinancialGoals => Set<FinancialGoal>();
+    public DbSet<FinancialGoalContribution> FinancialGoalContributions => Set<FinancialGoalContribution>();
     public DbSet<Debt> Debts => Set<Debt>();
     public DbSet<DebtPayment> DebtPayments => Set<DebtPayment>();
     public DbSet<DebtInstallment> DebtInstallments => Set<DebtInstallment>();
     public DbSet<AccountingPeriod> AccountingPeriods => Set<AccountingPeriod>();
     public DbSet<UserContextEntry> UserContextEntries => Set<UserContextEntry>();
+    public DbSet<Store> Stores => Set<Store>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<StoreProductPrice> StoreProductPrices => Set<StoreProductPrice>();
+    public DbSet<ShoppingList> ShoppingLists => Set<ShoppingList>();
+    public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
+    public DbSet<ReceiptImport> ReceiptImports => Set<ReceiptImport>();
+    public DbSet<ReceiptImportLine> ReceiptImportLines => Set<ReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

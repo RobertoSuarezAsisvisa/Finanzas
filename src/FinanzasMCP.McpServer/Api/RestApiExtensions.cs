@@ -20,6 +20,7 @@ public static class RestApiExtensions
         secureApi.MapDebtEndpoints();
         secureApi.MapRecurringRuleEndpoints();
         secureApi.MapContextAndReportEndpoints();
+        secureApi.MapShoppingEndpoints();
 
         return app;
     }

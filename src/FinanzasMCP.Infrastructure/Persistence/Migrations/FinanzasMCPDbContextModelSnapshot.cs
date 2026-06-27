@@ -303,47 +303,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.PurchaseGoalContribution", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTimeOffset>("ContributionDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PurchaseGoalId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("TransactionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PurchaseGoalId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("purchase_goal_contributions", (string)null);
-                });
-
-            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.SavingGoalContribution", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.FinancialGoalContribution", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -382,7 +342,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("saving_goal_contributions", (string)null);
+                    b.ToTable("financial_goal_contributions", (string)null);
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Crypto.CryptoLot", b =>
@@ -622,7 +582,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.ToTable("debt_payments", (string)null);
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.PurchaseGoal", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Goals.FinancialGoal", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -631,8 +591,15 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CurrentAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -640,10 +607,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<decimal>("GoalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -653,20 +616,22 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset?>("PurchasedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("SavedAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<decimal>("TargetAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<DateTimeOffset?>("TargetDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -682,64 +647,13 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("Status", "Priority");
-
-                    b.ToTable("purchase_goals", (string)null);
-                });
-
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.SavingGoal", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AccountId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("CurrentAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("GoalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTimeOffset?>("GoalDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("Status");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("saving_goals", (string)null);
+                    b.HasIndex("Type", "Status", "Priority");
+
+                    b.ToTable("financial_goals", (string)null);
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Recurring.RecurringRule", b =>
@@ -806,6 +720,415 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.HasIndex("AccountId", "IsActive");
 
                     b.ToTable("recurring_rules", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("character varying(180)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("shopping_products", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(220)
+                        .HasColumnType("character varying(220)");
+
+                    b.Property<decimal>("NormalizedQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "ProductId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("shopping_product_variants", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ReceiptImport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DetectedStoreName")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<DateTimeOffset?>("ReceiptDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("shopping_receipt_imports", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ReceiptImportLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("character varying(180)");
+
+                    b.Property<Guid?>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<Guid>("ReceiptImportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VariantName")
+                        .IsRequired()
+                        .HasMaxLength(220)
+                        .HasColumnType("character varying(220)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ReceiptImportId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("shopping_receipt_import_lines", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ShoppingList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ListDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("character varying(180)");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListDate");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("shopping_lists", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ShoppingListItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("DesiredQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ShoppingListId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("shopping_list_items", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.Store", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("shopping_stores", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.StoreProductPrice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("NormalizedQuantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("ObservedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ReceiptImportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("StoreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptImportId");
+
+                    b.HasIndex("StoreId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ProductVariantId", "StoreId", "ObservedAt");
+
+                    b.ToTable("shopping_store_product_prices", (string)null);
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Tags.Tag", b =>
@@ -1189,30 +1512,20 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.PurchaseGoalContribution", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.FinancialGoalContribution", b =>
                 {
-                    b.HasOne("FinanzasMCP.Domain.Goals.PurchaseGoal", "PurchaseGoal")
-                        .WithMany("Contributions")
-                        .HasForeignKey("PurchaseGoalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PurchaseGoal");
-                });
-
-            modelBuilder.Entity("FinanzasMCP.Domain.Contributions.SavingGoalContribution", b =>
-                {
-                    b.HasOne("FinanzasMCP.Domain.Goals.SavingGoal", "SavingGoal")
+                    b.HasOne("FinanzasMCP.Domain.Goals.FinancialGoal", "Goal")
                         .WithMany("Contributions")
                         .HasForeignKey("GoalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FinanzasMCP.Domain.Transactions.Transaction", "Transaction")
-                        .WithMany("SavingGoalContributions")
-                        .HasForeignKey("TransactionId");
+                        .WithMany("FinancialGoalContributions")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("SavingGoal");
+                    b.Navigation("Goal");
 
                     b.Navigation("Transaction");
                 });
@@ -1259,20 +1572,12 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Debt");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.PurchaseGoal", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Goals.FinancialGoal", b =>
                 {
                     b.HasOne("FinanzasMCP.Domain.Accounts.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.SavingGoal", b =>
-                {
-                    b.HasOne("FinanzasMCP.Domain.Accounts.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Account");
                 });
@@ -1292,6 +1597,110 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.Product", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Categories.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ProductVariant", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Shopping.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ReceiptImport", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Shopping.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ReceiptImportLine", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ReceiptImport", "ReceiptImport")
+                        .WithMany("Lines")
+                        .HasForeignKey("ReceiptImportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ReceiptImport");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ShoppingList", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Transactions.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ShoppingListItem", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ShoppingList", "ShoppingList")
+                        .WithMany("Items")
+                        .HasForeignKey("ShoppingListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ShoppingList");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.StoreProductPrice", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ProductVariant", "ProductVariant")
+                        .WithMany("Prices")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinanzasMCP.Domain.Shopping.ReceiptImport", "ReceiptImport")
+                        .WithMany()
+                        .HasForeignKey("ReceiptImportId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FinanzasMCP.Domain.Shopping.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ReceiptImport");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Transactions.Transaction", b =>
@@ -1404,14 +1813,29 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Payments");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.PurchaseGoal", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Goals.FinancialGoal", b =>
                 {
                     b.Navigation("Contributions");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Goals.SavingGoal", b =>
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.Product", b =>
                 {
-                    b.Navigation("Contributions");
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ProductVariant", b =>
+                {
+                    b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ReceiptImport", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.Shopping.ShoppingList", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Tags.Tag", b =>
@@ -1423,7 +1847,7 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Attachments");
 
-                    b.Navigation("SavingGoalContributions");
+                    b.Navigation("FinancialGoalContributions");
 
                     b.Navigation("Tags");
                 });

@@ -1,9 +1,11 @@
 using FinanzasMCP.Application;
 using FinanzasMCP.Application.Auth;
+using FinanzasMCP.Application.Shopping;
 using FinanzasMCP.Infrastructure;
 using FinanzasMCP.Infrastructure.Persistence;
 using FinanzasMCP.McpServer.Api;
 using FinanzasMCP.McpServer.Auth;
+using FinanzasMCP.McpServer.Shopping;
 using FinanzasMCP.McpServer.Storage;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -57,6 +59,7 @@ builder.Services.AddSingleton<FirebaseAuthService>();
 builder.Services.AddSingleton<GoogleCredentialResolver>();
 builder.Services.AddSingleton<ITransactionAttachmentProcessor, TransactionAttachmentProcessor>();
 builder.Services.AddSingleton<ITransactionAttachmentStorage, TransactionAttachmentStorage>();
+builder.Services.AddHttpClient<IReceiptParser, GeminiReceiptParser>();
 builder.Services.AddScoped<LegacyDataClaimer>();
 
 var jwtSigningKey = builder.Configuration["Jwt:SigningKey"];
@@ -123,8 +126,10 @@ builder.Services
     .WithTools<BudgetTools>()
     .WithTools<CryptoLotTools>()
     .WithTools<AccountingPeriodTools>()
+    .WithTools<GoalTools>()
     .WithTools<SavingGoalTools>()
     .WithTools<PurchaseGoalTools>()
+    .WithTools<ContributionTools>()
     .WithTools<DebtTools>()
     .WithTools<DebtPaymentTools>()
     .WithTools<RecurringRuleTools>()

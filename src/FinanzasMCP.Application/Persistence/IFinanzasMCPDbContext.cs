@@ -1,6 +1,9 @@
 using FinanzasMCP.Domain.Accounts;
 using FinanzasMCP.Domain.AccountingPeriods;
+using FinanzasMCP.Domain.Contributions;
 using FinanzasMCP.Domain.Crypto;
+using FinanzasMCP.Domain.Goals;
+using FinanzasMCP.Domain.Shopping;
 using FinanzasMCP.Domain.Transactions;
 using FinanzasMCP.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +19,16 @@ public interface IFinanzasMCPDbContext
     DbSet<CryptoLot> CryptoLots { get; }
     DbSet<AccountingPeriod> AccountingPeriods { get; }
     DbSet<TransactionAttachment> TransactionAttachments { get; }
+    DbSet<FinancialGoal> FinancialGoals { get; }
+    DbSet<FinancialGoalContribution> FinancialGoalContributions { get; }
+    DbSet<Store> Stores { get; }
+    DbSet<Product> Products { get; }
+    DbSet<ProductVariant> ProductVariants { get; }
+    DbSet<StoreProductPrice> StoreProductPrices { get; }
+    DbSet<ShoppingList> ShoppingLists { get; }
+    DbSet<ShoppingListItem> ShoppingListItems { get; }
+    DbSet<ReceiptImport> ReceiptImports { get; }
+    DbSet<ReceiptImportLine> ReceiptImportLines { get; }
     DbSet<AppUser> Users { get; }
     DbSet<UserApiKey> UserApiKeys { get; }
     DbSet<UserExternalLogin> UserExternalLogins { get; }
