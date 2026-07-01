@@ -1,14 +1,16 @@
 using FinanzasMCP.Application.Common.DTOs;
 using FinanzasMCP.Application.Common;
+using FinanzasMCP.Application.CreditCards.Services;
 using FinanzasMCP.Application.Persistence;
 using FinanzasMCP.Application.Transactions.Commands;
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.Budgets;
 using FinanzasMCP.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanzasMCP.Application.Transactions.Handlers;
 
-public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
+public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext, CreditCardTransactionService creditCardTransactionService)
 {
     public async Task<TransactionSummary> Handle(CreateTransactionCommand command, CancellationToken cancellationToken = default)
     {
@@ -21,6 +23,13 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
         {
             throw new InvalidOperationException("Destination account is required for transfers.");
         }
+
+        if (command.Type == TransactionType.Expense && command.CategoryId is null)
+        {
+            throw new InvalidOperationException("Expense transactions require a category.");
+        }
+
+        await ValidateBudgetAsync(command.Type, command.BudgetId, cancellationToken);
 
         var account = await dbContext.Accounts.FirstAsync(x => x.Id == command.AccountId, cancellationToken);
         Account? toAccount = null;
@@ -42,21 +51,18 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
             command.TransactionDate.ToUtcSafe(),
             command.RecurringRuleId);
 
-        switch (command.Type)
-        {
-            case TransactionType.Income:
-                account.Deposit(command.Amount);
-                break;
-            case TransactionType.Expense:
-                account.Withdraw(command.Amount);
-                break;
-            case TransactionType.Transfer:
-                account.Withdraw(command.Amount);
-                toAccount?.Deposit(command.Amount);
-                break;
-        }
-
         dbContext.Set<Transaction>().Add(transaction);
+        await creditCardTransactionService.ApplyAsync(
+            transaction,
+            account,
+            toAccount,
+            command.CreditCardOperationType,
+            command.CreditCardStatementId,
+            command.IsForeignCreditCardTransaction,
+            command.InstallmentCount,
+            command.Merchant,
+            cancellationToken);
+
         transaction.ReplaceTags(command.TagIds);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -73,6 +79,31 @@ public sealed class CreateTransactionHandler(IFinanzasMCPDbContext dbContext)
             transaction.Reference,
             transaction.TransactionDate,
             transaction.Tags.Select(tag => tag.TagId).ToArray(),
-            0);
+            0,
+            null,
+            command.CreditCardOperationType,
+            command.CreditCardStatementId,
+            command.IsForeignCreditCardTransaction,
+            command.InstallmentCount,
+            command.Merchant);
+    }
+
+    private async Task ValidateBudgetAsync(TransactionType type, Guid? budgetId, CancellationToken cancellationToken)
+    {
+        if (budgetId is null)
+        {
+            return;
+        }
+
+        if (type != TransactionType.Expense)
+        {
+            throw new InvalidOperationException("Only expense transactions can be assigned to a budget.");
+        }
+
+        var budget = await dbContext.Set<Budget>().FirstAsync(x => x.Id == budgetId.Value, cancellationToken);
+        if (!budget.IsActive)
+        {
+            throw new InvalidOperationException("The selected budget is inactive.");
+        }
     }
 }

@@ -1,4 +1,3 @@
-using FinanzasMCP.Domain.Categories;
 using FinanzasMCP.Domain.Common;
 
 namespace FinanzasMCP.Domain.Budgets;
@@ -6,22 +5,20 @@ namespace FinanzasMCP.Domain.Budgets;
 public sealed class Budget : UserOwnedEntity
 {
     public string Name { get; private set; } = string.Empty;
-    public Guid? CategoryId { get; private set; }
     public decimal LimitAmount { get; private set; }
     public PeriodType PeriodType { get; private set; }
     public BudgetValidityType ValidityType { get; private set; }
     public DateTimeOffset? PeriodStart { get; private set; }
     public DateTimeOffset? PeriodEnd { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public Category? Category { get; private set; }
 
-    public static Budget Create(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null, Guid? categoryId = null)
+    public static Budget Create(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart = null, DateTimeOffset? periodEnd = null)
     {
+        ValidateDetails(name, limitAmount, periodType);
         ValidatePeriod(validityType, periodStart, periodEnd);
         return new Budget
         {
             Name = name.Trim(),
-            CategoryId = categoryId,
             LimitAmount = limitAmount,
             PeriodType = periodType,
             ValidityType = validityType,
@@ -31,19 +28,37 @@ public sealed class Budget : UserOwnedEntity
         };
     }
 
-    public void UpdateDetails(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart, DateTimeOffset? periodEnd, bool isActive, Guid? categoryId = null)
+    public void UpdateDetails(string name, decimal limitAmount, PeriodType periodType, BudgetValidityType validityType, DateTimeOffset? periodStart, DateTimeOffset? periodEnd, bool isActive)
     {
+        ValidateDetails(name, limitAmount, periodType);
         ValidatePeriod(validityType, periodStart, periodEnd);
 
         Name = name.Trim();
         LimitAmount = limitAmount;
-        CategoryId = categoryId;
         PeriodType = periodType;
         ValidityType = validityType;
         PeriodStart = periodStart;
         PeriodEnd = periodEnd;
         IsActive = isActive;
         MarkUpdated();
+    }
+
+    private static void ValidateDetails(string name, decimal limitAmount, PeriodType periodType)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException("Budget name is required.");
+        }
+
+        if (limitAmount <= 0)
+        {
+            throw new InvalidOperationException("Budget limit must be positive.");
+        }
+
+        if (!Enum.IsDefined(periodType))
+        {
+            throw new InvalidOperationException("Budget period type is invalid.");
+        }
     }
 
     private static void ValidatePeriod(BudgetValidityType validityType, DateTimeOffset? periodStart, DateTimeOffset? periodEnd)

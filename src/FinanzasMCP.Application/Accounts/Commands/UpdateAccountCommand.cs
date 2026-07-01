@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Application.Accounts.Commands;
 
@@ -16,4 +17,16 @@ public sealed record UpdateAccountCommand(
     string? CryptoNetwork,
     decimal? CryptoQuantity,
     decimal? CryptoAvgBuyPriceUsd,
+    string? CreditCardIssuer,
+    CreditCardBrand? CreditCardBrand,
+    string? CreditCardProductName,
+    string? CreditCardLastFour,
+    decimal? CreditLimit,
+    int? StatementClosingDay,
+    int? PaymentDueDay,
+    CreditCardPaymentMode? PaymentMode,
+    string? RewardsProgram,
+    CreditCardStatementDelivery? StatementDelivery,
+    decimal? InterestNominalAnnual,
+    decimal? InterestEffectiveAnnual,
     bool IsActive);

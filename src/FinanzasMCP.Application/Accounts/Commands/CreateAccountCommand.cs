@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Application.Accounts.Commands;
 
@@ -14,4 +15,17 @@ public sealed record CreateAccountCommand(
     string? CryptoSymbol,
     string? CryptoNetwork,
     decimal? CryptoQuantity,
-    decimal? CryptoAvgBuyPriceUsd);
+    decimal? CryptoAvgBuyPriceUsd,
+    string? CreditCardIssuer,
+    CreditCardBrand? CreditCardBrand,
+    string? CreditCardProductName,
+    string? CreditCardLastFour,
+    decimal? CreditLimit,
+    decimal? OutstandingBalance,
+    int? StatementClosingDay,
+    int? PaymentDueDay,
+    CreditCardPaymentMode? PaymentMode,
+    string? RewardsProgram,
+    CreditCardStatementDelivery? StatementDelivery,
+    decimal? InterestNominalAnnual,
+    decimal? InterestEffectiveAnnual);

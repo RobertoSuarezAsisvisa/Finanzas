@@ -13,6 +13,13 @@ public sealed class UpdateBudgetHandler(IFinanzasMCPDbContext dbContext)
         var budget = await dbContext.Set<Budget>().FirstAsync(x => x.Id == command.Id, cancellationToken);
         budget.UpdateDetails(command.Name, command.LimitAmount, command.PeriodType, command.ValidityType, command.PeriodStart, command.PeriodEnd, command.IsActive);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return new BudgetSummary(budget.Id, budget.Name, budget.CategoryId, budget.LimitAmount, budget.PeriodType, budget.ValidityType, budget.PeriodStart, budget.PeriodEnd, budget.IsActive);
+
+        var period = BudgetUsageCalculator.CurrentPeriod(budget, DateTimeOffset.UtcNow);
+        var transactions = await dbContext.Set<FinanzasMCP.Domain.Transactions.Transaction>()
+            .AsNoTracking()
+            .Where(x => x.BudgetId == budget.Id && x.TransactionDate >= period.Start && x.TransactionDate <= period.End)
+            .ToListAsync(cancellationToken);
+
+        return BudgetUsageCalculator.ToSummary(budget, transactions, DateTimeOffset.UtcNow);
     }
 }

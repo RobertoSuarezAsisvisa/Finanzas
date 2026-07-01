@@ -2,6 +2,7 @@ using FinanzasMCP.Application.Common.DTOs;
 using FinanzasMCP.Application.Transactions.Commands;
 using FinanzasMCP.Application.Transactions.Handlers;
 using FinanzasMCP.Application.Transactions.Queries;
+using FinanzasMCP.Domain.CreditCards;
 using FinanzasMCP.Domain.Transactions;
 using ModelContextProtocol.Server;
 
@@ -28,21 +29,27 @@ public sealed class TransactionTools(
         DateTimeOffset? transactionDate = null,
         Guid? recurringRuleId = null,
         IReadOnlyList<Guid>? tagIds = null,
+        CreditCardOperationType? creditCardOperationType = null,
+        Guid? creditCardStatementId = null,
+        bool isForeignCreditCardTransaction = false,
+        int? installmentCount = null,
+        string? merchant = null,
         CancellationToken cancellationToken = default)
-        => createTransactionHandler.Handle(new CreateTransactionCommand(type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
+        => createTransactionHandler.Handle(new CreateTransactionCommand(type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>(), creditCardOperationType, creditCardStatementId, isForeignCreditCardTransaction, installmentCount, merchant), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Lists paged transactions with optional filters.")]
     public Task<PagedResult<TransactionSummary>> ListTransactions(
         Guid? accountId = null,
         TransactionType? type = null,
         Guid? categoryId = null,
+        Guid? budgetId = null,
         DateTimeOffset? dateFrom = null,
         DateTimeOffset? dateTo = null,
         string? search = null,
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
-        => getTransactionsHandler.Handle(new GetTransactionsQuery(accountId, type, categoryId, dateFrom, dateTo, search, page, pageSize), cancellationToken);
+        => getTransactionsHandler.Handle(new GetTransactionsQuery(accountId, type, categoryId, budgetId, dateFrom, dateTo, search, page, pageSize), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Updates a transaction and reapplies its balance impact.")]
     public Task<TransactionSummary> UpdateTransaction(
@@ -59,8 +66,13 @@ public sealed class TransactionTools(
         DateTimeOffset? transactionDate = null,
         Guid? recurringRuleId = null,
         IReadOnlyList<Guid>? tagIds = null,
+        CreditCardOperationType? creditCardOperationType = null,
+        Guid? creditCardStatementId = null,
+        bool isForeignCreditCardTransaction = false,
+        int? installmentCount = null,
+        string? merchant = null,
         CancellationToken cancellationToken = default)
-        => updateTransactionHandler.Handle(new UpdateTransactionCommand(id, type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>()), cancellationToken);
+        => updateTransactionHandler.Handle(new UpdateTransactionCommand(id, type, amount, currency, accountId, toAccountId, categoryId, budgetId, description, reference, transactionDate ?? DateTimeOffset.UtcNow, recurringRuleId, tagIds ?? Array.Empty<Guid>(), creditCardOperationType, creditCardStatementId, isForeignCreditCardTransaction, installmentCount, merchant), cancellationToken);
 
     [McpServerTool, System.ComponentModel.Description("Logically deletes a transaction and reverts its balance impact.")]
     public Task DeleteTransaction(Guid id, CancellationToken cancellationToken = default)

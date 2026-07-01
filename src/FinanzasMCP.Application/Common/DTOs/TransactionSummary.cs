@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Transactions;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Application.Common.DTOs;
 
@@ -15,4 +16,10 @@ public sealed record TransactionSummary(
     string? Reference,
     DateTimeOffset TransactionDate,
     IReadOnlyList<Guid> TagIds,
-    int AttachmentCount);
+    int AttachmentCount,
+    Guid? CreditCardAccountId = null,
+    CreditCardOperationType? CreditCardOperationType = null,
+    Guid? CreditCardStatementId = null,
+    bool IsForeignCreditCardTransaction = false,
+    int? InstallmentCount = null,
+    string? Merchant = null);

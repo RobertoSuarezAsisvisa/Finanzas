@@ -33,6 +33,11 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
             transactions = transactions.Where(x => x.CategoryId == query.CategoryId);
         }
 
+        if (query.BudgetId is not null)
+        {
+            transactions = transactions.Where(x => x.BudgetId == query.BudgetId);
+        }
+
         if (query.DateFrom is not null)
         {
             transactions = transactions.Where(x => x.TransactionDate >= query.DateFrom);
@@ -52,13 +57,22 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
         }
 
         var totalCount = await transactions.CountAsync(cancellationToken);
-        var list = await transactions
+        var list = (await transactions.ToListAsync(cancellationToken))
             .OrderByDescending(x => x.TransactionDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
-        var items = list.Select(x => new TransactionSummary(
+        var transactionIds = list.Select(x => x.Id).ToArray();
+        var creditCardTransactions = await dbContext.CreditCardTransactions
+            .AsNoTracking()
+            .Where(x => transactionIds.Contains(x.TransactionId))
+            .ToDictionaryAsync(x => x.TransactionId, cancellationToken);
+
+        var items = list.Select(x =>
+        {
+            creditCardTransactions.TryGetValue(x.Id, out var creditCardTransaction);
+            return new TransactionSummary(
             x.Id,
             x.Type,
             x.Amount,
@@ -71,7 +85,14 @@ public sealed class GetTransactionsHandler(IFinanzasMCPDbContext dbContext)
             x.Reference,
             x.TransactionDate,
             x.Tags.Select(tag => tag.TagId).ToArray(),
-            x.Attachments.Count(attachment => attachment.DeletedAt == null))).ToArray();
+            x.Attachments.Count(attachment => attachment.DeletedAt == null),
+            creditCardTransaction?.CreditCardAccountId,
+            creditCardTransaction?.OperationType,
+            creditCardTransaction?.StatementId,
+            creditCardTransaction?.IsForeign ?? false,
+            creditCardTransaction?.InstallmentCount,
+            creditCardTransaction?.Merchant);
+        }).ToArray();
 
         return new PagedResult<TransactionSummary>(items, totalCount, page, pageSize);
     }

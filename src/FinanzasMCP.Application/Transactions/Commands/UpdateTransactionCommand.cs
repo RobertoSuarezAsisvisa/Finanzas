@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Transactions;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Application.Transactions.Commands;
 
@@ -15,4 +16,9 @@ public sealed record UpdateTransactionCommand(
     string? Reference,
     DateTimeOffset TransactionDate,
     Guid? RecurringRuleId,
-    IReadOnlyList<Guid> TagIds);
+    IReadOnlyList<Guid> TagIds,
+    CreditCardOperationType? CreditCardOperationType,
+    Guid? CreditCardStatementId,
+    bool IsForeignCreditCardTransaction,
+    int? InstallmentCount,
+    string? Merchant);

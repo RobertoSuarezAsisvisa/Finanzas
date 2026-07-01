@@ -14,6 +14,7 @@ public static class RestApiExtensions
         secureApi.MapAccountEndpoints();
         secureApi.MapCatalogEndpoints();
         secureApi.MapCashflowEndpoints();
+        secureApi.MapCreditCardEndpoints();
         secureApi.MapCryptoEndpoints();
         secureApi.MapAccountingPeriodEndpoints();
         secureApi.MapGoalEndpoints();

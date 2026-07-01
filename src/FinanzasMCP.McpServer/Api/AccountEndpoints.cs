@@ -16,13 +16,13 @@ public static class AccountEndpoints
 
         group.MapPost("", async (CreateAccountRequest request, CreateAccountHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateAccountCommand(request.Name, request.AccountType, request.Currency, NormalizePurpose(request.Purpose), request.Balance, request.BankName, request.AccountNumber, request.Provider, request.CryptoSymbol, request.CryptoNetwork, request.CryptoQuantity, request.CryptoAvgBuyPriceUsd), ct);
+            var result = await handler.Handle(new CreateAccountCommand(request.Name, request.AccountType, request.Currency, NormalizePurpose(request.Purpose), request.Balance, request.BankName, request.AccountNumber, request.Provider, request.CryptoSymbol, request.CryptoNetwork, request.CryptoQuantity, request.CryptoAvgBuyPriceUsd, request.CreditCardIssuer, request.CreditCardBrand, request.CreditCardProductName, request.CreditCardLastFour, request.CreditLimit, request.OutstandingBalance, request.StatementClosingDay, request.PaymentDueDay, request.PaymentMode, request.RewardsProgram, request.StatementDelivery, request.InterestNominalAnnual, request.InterestEffectiveAnnual), ct);
             return Results.Created($"/api/v1/accounts/{result.Id}", result);
         });
 
         group.MapPut("{id:guid}", async (Guid id, UpdateAccountRequest request, UpdateAccountHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new UpdateAccountCommand(id, request.Name, request.AccountType, request.Currency, NormalizePurpose(request.Purpose), request.Balance, request.BankName, request.AccountNumber, request.Provider, request.CryptoSymbol, request.CryptoNetwork, request.CryptoQuantity, request.CryptoAvgBuyPriceUsd, request.IsActive), ct);
+            var result = await handler.Handle(new UpdateAccountCommand(id, request.Name, request.AccountType, request.Currency, NormalizePurpose(request.Purpose), request.Balance, request.BankName, request.AccountNumber, request.Provider, request.CryptoSymbol, request.CryptoNetwork, request.CryptoQuantity, request.CryptoAvgBuyPriceUsd, request.CreditCardIssuer, request.CreditCardBrand, request.CreditCardProductName, request.CreditCardLastFour, request.CreditLimit, request.StatementClosingDay, request.PaymentDueDay, request.PaymentMode, request.RewardsProgram, request.StatementDelivery, request.InterestNominalAnnual, request.InterestEffectiveAnnual, request.IsActive), ct);
             return Results.Ok(result);
         });
 

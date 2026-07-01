@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Common;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Domain.Accounts;
 
@@ -14,6 +15,7 @@ public sealed class Account : UserOwnedEntity
     public string? Provider { get; private set; }
     public bool IsActive { get; private set; } = true;
     public CryptoAccount? CryptoAccount { get; private set; }
+    public CreditCardAccount? CreditCardAccount { get; private set; }
 
     public void Deposit(decimal amount)
     {

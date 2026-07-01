@@ -4,6 +4,7 @@ using FinanzasMCP.Domain.Budgets;
 using FinanzasMCP.Domain.Categories;
 using FinanzasMCP.Domain.Contributions;
 using FinanzasMCP.Domain.Crypto;
+using FinanzasMCP.Domain.CreditCards;
 using FinanzasMCP.Domain.Debts;
 using FinanzasMCP.Domain.Goals;
 using FinanzasMCP.Domain.Recurring;
@@ -33,6 +34,9 @@ public sealed class FinanzasMCPDbContext(
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<CryptoAccount> CryptoAccounts => Set<CryptoAccount>();
+    public DbSet<CreditCardAccount> CreditCardAccounts => Set<CreditCardAccount>();
+    public DbSet<CreditCardStatement> CreditCardStatements => Set<CreditCardStatement>();
+    public DbSet<CreditCardTransaction> CreditCardTransactions => Set<CreditCardTransaction>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Transaction> Transactions => Set<Transaction>();

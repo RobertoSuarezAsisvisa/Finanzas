@@ -198,9 +198,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -242,8 +239,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
 
@@ -343,6 +338,237 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("financial_goal_contributions", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AvailableCredit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CreditLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("InterestEffectiveAnnual")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<decimal?>("InterestNominalAnnual")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Issuer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LastFour")
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)");
+
+                    b.Property<decimal>("OutstandingBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("PaymentDueDay")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("ProductName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("RewardsProgram")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("StatementClosingDay")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StatementDelivery")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("credit_card_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardStatement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreditCardAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Fees")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("Interest")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("MinimumPayment")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("OpeningBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("Payments")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset>("PeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Purchases")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("StatementBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset>("StatementDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreditCardAccountId");
+
+                    b.HasIndex("DueDate");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("credit_card_statements", (string)null);
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreditCardAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("InstallmentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsForeign")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Merchant")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("OperationType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid?>("StatementId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreditCardAccountId");
+
+                    b.HasIndex("OperationType");
+
+                    b.HasIndex("StatementId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("credit_card_transactions", (string)null);
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Crypto.CryptoLot", b =>
@@ -1493,16 +1719,6 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("FinanzasMCP.Domain.Budgets.Budget", b =>
-                {
-                    b.HasOne("FinanzasMCP.Domain.Categories.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Category");
-                });
-
             modelBuilder.Entity("FinanzasMCP.Domain.Categories.Category", b =>
                 {
                     b.HasOne("FinanzasMCP.Domain.Categories.Category", "Parent")
@@ -1526,6 +1742,54 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Goal");
+
+                    b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardAccount", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.Accounts.Account", "Account")
+                        .WithOne("CreditCardAccount")
+                        .HasForeignKey("FinanzasMCP.Domain.CreditCards.CreditCardAccount", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardStatement", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.CreditCards.CreditCardAccount", "CreditCardAccount")
+                        .WithMany("Statements")
+                        .HasForeignKey("CreditCardAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreditCardAccount");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardTransaction", b =>
+                {
+                    b.HasOne("FinanzasMCP.Domain.CreditCards.CreditCardAccount", "CreditCardAccount")
+                        .WithMany("CreditCardTransactions")
+                        .HasForeignKey("CreditCardAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinanzasMCP.Domain.CreditCards.CreditCardStatement", "Statement")
+                        .WithMany()
+                        .HasForeignKey("StatementId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FinanzasMCP.Domain.Transactions.Transaction", "Transaction")
+                        .WithOne()
+                        .HasForeignKey("FinanzasMCP.Domain.CreditCards.CreditCardTransaction", "TransactionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreditCardAccount");
+
+                    b.Navigation("Statement");
 
                     b.Navigation("Transaction");
                 });
@@ -1793,6 +2057,8 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FinanzasMCP.Domain.Accounts.Account", b =>
                 {
+                    b.Navigation("CreditCardAccount");
+
                     b.Navigation("CryptoAccount");
                 });
 
@@ -1804,6 +2070,13 @@ namespace FinanzasMCP.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("FinanzasMCP.Domain.Categories.Category", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("FinanzasMCP.Domain.CreditCards.CreditCardAccount", b =>
+                {
+                    b.Navigation("CreditCardTransactions");
+
+                    b.Navigation("Statements");
                 });
 
             modelBuilder.Entity("FinanzasMCP.Domain.Debts.Debt", b =>

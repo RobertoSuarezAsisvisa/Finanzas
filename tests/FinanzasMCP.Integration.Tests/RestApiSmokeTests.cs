@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using FinanzasMCP.Application.Common.DTOs;
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.Budgets;
+using FinanzasMCP.Domain.Categories;
 using FinanzasMCP.Domain.Goals;
 using FinanzasMCP.Domain.Shopping;
 using FinanzasMCP.Infrastructure.Persistence;
@@ -134,6 +136,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         createAccountResponse.EnsureSuccessStatusCode();
         var account = await createAccountResponse.Content.ReadFromJsonAsync<AccountSummary>(JsonOptions);
         Assert.NotNull(account);
+        var category = await CreateCategoryAsync(client, "Transacciones invalidas");
 
         var response = await client.PostAsJsonAsync("/api/v1/transactions", new
         {
@@ -142,7 +145,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
             currency = "USD",
             accountId = account!.Id,
             toAccountId = (Guid?)null,
-            categoryId = (Guid?)null,
+            categoryId = category.Id,
             description = "Invalid",
             reference = (string?)null,
             transactionDate = DateTimeOffset.UtcNow,
@@ -151,6 +154,49 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Expense_requires_category_but_income_does_not()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        await AuthenticateAsync(client);
+        var account = await CreateAccountAsync(client, "Cuenta categorias requeridas");
+
+        var expenseWithoutCategory = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = "Expense",
+            amount = 10m,
+            currency = "USD",
+            accountId = account.Id,
+            toAccountId = (Guid?)null,
+            categoryId = (Guid?)null,
+            budgetId = (Guid?)null,
+            description = "Gasto sin categoria",
+            reference = (string?)null,
+            transactionDate = DateTimeOffset.UtcNow,
+            recurringRuleId = (Guid?)null,
+            tagIds = Array.Empty<Guid>()
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, expenseWithoutCategory.StatusCode);
+
+        var incomeWithoutCategory = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = "Income",
+            amount = 10m,
+            currency = "USD",
+            accountId = account.Id,
+            toAccountId = (Guid?)null,
+            categoryId = (Guid?)null,
+            budgetId = (Guid?)null,
+            description = "Ingreso sin categoria",
+            reference = (string?)null,
+            transactionDate = DateTimeOffset.UtcNow,
+            recurringRuleId = (Guid?)null,
+            tagIds = Array.Empty<Guid>()
+        });
+        Assert.True(incomeWithoutCategory.IsSuccessStatusCode, await incomeWithoutCategory.Content.ReadAsStringAsync());
     }
 
     [Fact]
@@ -355,6 +401,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         createAccountResponse.EnsureSuccessStatusCode();
         var account = await createAccountResponse.Content.ReadFromJsonAsync<AccountSummary>(JsonOptions);
         Assert.NotNull(account);
+        var category = await CreateCategoryAsync(client, "Taxi");
 
         var createTransactionResponse = await client.PostAsJsonAsync("/api/v1/transactions", new
         {
@@ -363,7 +410,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
             currency = "USD",
             accountId = account!.Id,
             toAccountId = (Guid?)null,
-            categoryId = (Guid?)null,
+            categoryId = category.Id,
             budgetId = (Guid?)null,
             description = "Taxi",
             reference = (string?)null,
@@ -398,6 +445,105 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task Budget_usage_history_and_transaction_filter_are_calculated_by_api()
+    {
+        factory.InitializeDatabase();
+        var client = factory.CreateClient();
+        await AuthenticateAsync(client);
+        var account = await CreateAccountAsync(client, "Cuenta presupuesto");
+        var category = await CreateCategoryAsync(client, "Comida");
+
+        var budgetResponse = await client.PostAsJsonAsync("/api/v1/budgets", new
+        {
+            name = "Comida",
+            limitAmount = 50m,
+            periodType = PeriodType.Monthly,
+            validityType = BudgetValidityType.Indefinite,
+            periodStart = (DateTimeOffset?)null,
+            periodEnd = (DateTimeOffset?)null
+        });
+        var budgetBody = await budgetResponse.Content.ReadAsStringAsync();
+        Assert.True(budgetResponse.IsSuccessStatusCode, budgetBody);
+        var budget = JsonSerializer.Deserialize<BudgetTestResponse>(budgetBody, JsonOptions);
+        Assert.NotNull(budget);
+
+        var now = DateTimeOffset.UtcNow;
+        var firstExpense = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = "Expense",
+            amount = 30m,
+            currency = "USD",
+            accountId = account.Id,
+            toAccountId = (Guid?)null,
+            categoryId = category.Id,
+            budgetId = budget!.Id,
+            description = "Almuerzo",
+            reference = (string?)null,
+            transactionDate = now,
+            recurringRuleId = (Guid?)null,
+            tagIds = Array.Empty<Guid>()
+        });
+        Assert.True(firstExpense.IsSuccessStatusCode, await firstExpense.Content.ReadAsStringAsync());
+
+        var secondExpense = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = "Expense",
+            amount = 25m,
+            currency = "USD",
+            accountId = account.Id,
+            toAccountId = (Guid?)null,
+            categoryId = category.Id,
+            budgetId = budget.Id,
+            description = "Cena",
+            reference = (string?)null,
+            transactionDate = now,
+            recurringRuleId = (Guid?)null,
+            tagIds = Array.Empty<Guid>()
+        });
+        Assert.True(secondExpense.IsSuccessStatusCode, await secondExpense.Content.ReadAsStringAsync());
+
+        var incomeWithBudget = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = "Income",
+            amount = 10m,
+            currency = "USD",
+            accountId = account.Id,
+            toAccountId = (Guid?)null,
+            categoryId = (Guid?)null,
+            budgetId = budget.Id,
+            description = "Ingreso invalido",
+            reference = (string?)null,
+            transactionDate = now,
+            recurringRuleId = (Guid?)null,
+            tagIds = Array.Empty<Guid>()
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, incomeWithBudget.StatusCode);
+
+        var budgetsResponse = await client.GetAsync("/api/v1/budgets");
+        var budgetsBody = await budgetsResponse.Content.ReadAsStringAsync();
+        Assert.True(budgetsResponse.IsSuccessStatusCode, budgetsBody);
+        var budgets = JsonSerializer.Deserialize<BudgetTestResponse[]>(budgetsBody, JsonOptions);
+        Assert.NotNull(budgets);
+        var updatedBudget = Assert.Single(budgets!, x => x.Id == budget.Id);
+        Assert.Equal(55m, updatedBudget.UsedAmount);
+        Assert.True(updatedBudget.IsOverLimit);
+        Assert.Equal(2, updatedBudget.TransactionCount);
+
+        var filteredTransactions = await client.GetFromJsonAsync<PagedResult<TransactionSummary>>($"/api/v1/transactions?budgetId={budget.Id}&page=1&pageSize=10", JsonOptions);
+        Assert.NotNull(filteredTransactions);
+        Assert.Equal(2, filteredTransactions!.TotalCount);
+
+        var dateFrom = Uri.EscapeDataString(now.AddDays(-1).ToString("O"));
+        var dateTo = Uri.EscapeDataString(now.AddDays(1).ToString("O"));
+        var historyResponse = await client.GetAsync($"/api/v1/budgets/{budget.Id}/usage-history?groupBy=month&dateFrom={dateFrom}&dateTo={dateTo}");
+        var historyBody = await historyResponse.Content.ReadAsStringAsync();
+        Assert.True(historyResponse.IsSuccessStatusCode, historyBody);
+        var history = JsonSerializer.Deserialize<BudgetHistoryTestResponse[]>(historyBody, JsonOptions);
+        Assert.NotNull(history);
+        Assert.Contains(history!, point => point.SpentAmount == 55m && point.IsOverLimit);
+    }
+
+    [Fact]
     public async Task Large_image_attachment_is_optimized_before_storage()
     {
         factory.InitializeDatabase();
@@ -422,6 +568,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         createAccountResponse.EnsureSuccessStatusCode();
         var account = await createAccountResponse.Content.ReadFromJsonAsync<AccountSummary>(JsonOptions);
         Assert.NotNull(account);
+        var category = await CreateCategoryAsync(client, "Evidencias");
 
         var createTransactionResponse = await client.PostAsJsonAsync("/api/v1/transactions", new
         {
@@ -430,7 +577,7 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
             currency = "USD",
             accountId = account!.Id,
             toAccountId = (Guid?)null,
-            categoryId = (Guid?)null,
+            categoryId = category.Id,
             budgetId = (Guid?)null,
             description = "Compra con evidencia",
             reference = (string?)null,
@@ -693,6 +840,23 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
         return store!;
     }
 
+    private async Task<CategorySummary> CreateCategoryAsync(HttpClient client, string name, CategoryType type = CategoryType.Expense)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/categories", new
+        {
+            name,
+            type,
+            icon = (string?)null,
+            parentId = (Guid?)null,
+            isSystem = false
+        });
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, body);
+        var category = JsonSerializer.Deserialize<CategorySummary>(body, JsonOptions);
+        Assert.NotNull(category);
+        return category!;
+    }
+
     private async Task<ShoppingProductTestResponse> CreateShoppingProductAsync(HttpClient client, string name)
     {
         var response = await client.PostAsJsonAsync("/api/v1/shopping/products", new { name, categoryId = (Guid?)null, notes = (string?)null });
@@ -759,6 +923,8 @@ public sealed class RestApiSmokeTests(ApiTestFactory factory) : IClassFixture<Ap
     private sealed record ApiKeyCreatedResponse(string ApiKey, ApiKeySummaryResponse Summary);
     private sealed record FinancialGoalTestResponse(Guid Id, string Name, string? Description, decimal TargetAmount, decimal CurrentAmount, FinancialGoalType Type, FinancialGoalStatus Status, int Priority, string? Url);
     private sealed record FinancialGoalContributionTestResponse(Guid Id, Guid GoalId, Guid? TransactionId, Guid? AccountId, decimal Amount, DateTimeOffset ContributionDate);
+    private sealed record BudgetTestResponse(Guid Id, string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd, bool IsActive, decimal UsedAmount, decimal RemainingAmount, decimal UsagePercent, int TransactionCount, bool IsOverLimit, DateTimeOffset CurrentPeriodStart, DateTimeOffset CurrentPeriodEnd);
+    private sealed record BudgetHistoryTestResponse(DateTimeOffset PeriodStart, DateTimeOffset PeriodEnd, string GroupKey, decimal SpentAmount, decimal LimitAmount, decimal RemainingAmount, decimal UsagePercent, int TransactionCount, bool IsOverLimit);
     private sealed record ShoppingStoreTestResponse(Guid Id, string Name, string? Notes);
     private sealed record ShoppingProductTestResponse(Guid Id, string Name, Guid? CategoryId, string? Notes);
     private sealed record ShoppingVariantTestResponse(Guid Id, Guid ProductId, string ProductName, string Name, decimal NormalizedQuantity, ShoppingUnit Unit, string? Barcode);

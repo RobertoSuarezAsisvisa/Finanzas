@@ -23,8 +23,8 @@ public static class CashflowEndpoints
 
     private static void MapTransactions(RouteGroupBuilder group)
     {
-        group.MapGet("", async (Guid? accountId, TransactionType? type, Guid? categoryId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, int? page, int? pageSize, GetTransactionsHandler handler, CancellationToken ct) =>
-            Results.Ok(await handler.Handle(new GetTransactionsQuery(accountId, type, categoryId, dateFrom, dateTo, search, page ?? 1, pageSize ?? 10), ct)));
+        group.MapGet("", async (Guid? accountId, TransactionType? type, Guid? categoryId, Guid? budgetId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, int? page, int? pageSize, GetTransactionsHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetTransactionsQuery(accountId, type, categoryId, budgetId, dateFrom, dateTo, search, page ?? 1, pageSize ?? 10), ct)));
 
         group.MapGet("summary", async (Guid? accountId, TransactionType? type, Guid? categoryId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, string? search, GetTransactionTotalsHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.Handle(new GetTransactionTotalsQuery(accountId, type, categoryId, dateFrom, dateTo, search), ct)));
@@ -56,7 +56,7 @@ public static class CashflowEndpoints
 
         group.MapPost("", async (CreateTransactionRequest request, CreateTransactionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateTransactionCommand(request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
+            var result = await handler.Handle(new CreateTransactionCommand(request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>(), request.CreditCardOperationType, request.CreditCardStatementId, request.IsForeignCreditCardTransaction ?? false, request.InstallmentCount, request.Merchant), ct);
             return Results.Created($"/api/v1/transactions/{result.Id}", result);
         });
 
@@ -106,7 +106,7 @@ public static class CashflowEndpoints
 
         group.MapPut("{id:guid}", async (Guid id, UpdateTransactionRequest request, UpdateTransactionHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new UpdateTransactionCommand(id, request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>()), ct);
+            var result = await handler.Handle(new UpdateTransactionCommand(id, request.Type, request.Amount, request.Currency, request.AccountId, request.ToAccountId, request.CategoryId, request.BudgetId, request.Description, request.Reference, request.TransactionDate, request.RecurringRuleId, request.TagIds ?? Array.Empty<Guid>(), request.CreditCardOperationType, request.CreditCardStatementId, request.IsForeignCreditCardTransaction ?? false, request.InstallmentCount, request.Merchant), ct);
             return Results.Ok(result);
         });
 
@@ -189,12 +189,12 @@ public static class CashflowEndpoints
 
     private static void MapBudgets(RouteGroupBuilder group)
     {
-        group.MapGet("", async (GetBudgetsHandler handler, CancellationToken ct) =>
-            Results.Ok(await handler.Handle(new GetBudgetsQuery(), ct)));
+        group.MapGet("", async (DateTimeOffset? dateFrom, DateTimeOffset? dateTo, GetBudgetsHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetBudgetsQuery(dateFrom, dateTo), ct)));
 
         group.MapPost("", async (CreateBudgetRequest request, CreateBudgetHandler handler, CancellationToken ct) =>
         {
-            var result = await handler.Handle(new CreateBudgetCommand(request.Name, request.LimitAmount, request.PeriodType, request.ValidityType, request.PeriodStart, request.PeriodEnd, request.CategoryId), ct);
+            var result = await handler.Handle(new CreateBudgetCommand(request.Name, request.LimitAmount, request.PeriodType, request.ValidityType, request.PeriodStart, request.PeriodEnd), ct);
             return Results.Created($"/api/v1/budgets/{result.Id}", result);
         });
 
@@ -204,10 +204,29 @@ public static class CashflowEndpoints
             return Results.Ok(result);
         });
 
+        group.MapGet("{id:guid}/usage-history", async (Guid id, string? groupBy, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, GetBudgetUsageHistoryHandler handler, CancellationToken ct) =>
+            Results.Ok(await handler.Handle(new GetBudgetUsageHistoryQuery(id, ParseBudgetUsageGroupBy(groupBy), dateFrom, dateTo), ct)));
+
         group.MapDelete("{id:guid}", async (Guid id, DeleteBudgetHandler handler, CancellationToken ct) =>
         {
             await handler.Handle(new DeleteBudgetCommand(id), ct);
             return Results.NoContent();
         });
+    }
+
+    private static BudgetUsageGroupBy ParseBudgetUsageGroupBy(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return BudgetUsageGroupBy.Month;
+        }
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "day" or "daily" => BudgetUsageGroupBy.Day,
+            "week" or "weekly" => BudgetUsageGroupBy.Week,
+            "month" or "monthly" => BudgetUsageGroupBy.Month,
+            _ => throw new InvalidOperationException("Budget usage groupBy must be day, week, or month.")
+        };
     }
 }

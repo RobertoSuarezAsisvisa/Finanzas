@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.CreditCards;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,5 +24,6 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.HasIndex(x => x.Name);
         builder.HasOne(x => x.CryptoAccount).WithOne(x => x.Account).HasForeignKey<CryptoAccount>(x => x.AccountId);
+        builder.HasOne(x => x.CreditCardAccount).WithOne(x => x.Account).HasForeignKey<CreditCardAccount>(x => x.AccountId);
     }
 }

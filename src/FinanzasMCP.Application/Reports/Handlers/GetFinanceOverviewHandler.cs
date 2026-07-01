@@ -3,6 +3,7 @@ using FinanzasMCP.Application.Persistence;
 using FinanzasMCP.Application.Reports.Queries;
 using FinanzasMCP.Domain.Accounts;
 using FinanzasMCP.Domain.Debts;
+using FinanzasMCP.Domain.CreditCards;
 using FinanzasMCP.Domain.Goals;
 using FinanzasMCP.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
@@ -27,10 +28,15 @@ public sealed class GetFinanceOverviewHandler(IFinanzasMCPDbContext dbContext)
 
         var totalIncome = await transactions.Where(x => x.Type == TransactionType.Income).SumAsync(x => x.Amount, cancellationToken);
         var totalExpenses = await transactions.Where(x => x.Type == TransactionType.Expense).SumAsync(x => x.Amount, cancellationToken);
-        var totalAssets = await dbContext.Accounts.Where(x => x.IsActive).SumAsync(x => x.Balance, cancellationToken);
+        var totalAssets = await dbContext.Accounts
+            .Where(x => x.IsActive && x.AccountType != AccountType.CreditCard)
+            .SumAsync(x => x.Balance, cancellationToken);
         var totalDebts = await dbContext.Set<Debt>()
             .Where(x => x.Type == DebtType.Payable && x.Status == DebtStatus.Active)
             .SumAsync(x => x.RemainingAmount, cancellationToken);
+        totalDebts += await dbContext.Set<CreditCardAccount>()
+            .Where(x => x.IsActive)
+            .SumAsync(x => x.OutstandingBalance, cancellationToken);
         var goalsProgress = await dbContext.Set<FinancialGoal>()
             .Select(x => (decimal?)(x.TargetAmount == 0 ? 0m : (x.CurrentAmount / x.TargetAmount) * 100m))
             .AverageAsync(cancellationToken) ?? 0m;

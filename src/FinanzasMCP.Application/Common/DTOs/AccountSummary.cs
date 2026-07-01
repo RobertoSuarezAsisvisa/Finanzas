@@ -1,4 +1,5 @@
 using FinanzasMCP.Domain.Accounts;
+using FinanzasMCP.Domain.CreditCards;
 
 namespace FinanzasMCP.Application.Common.DTOs;
 
@@ -16,4 +17,19 @@ public sealed record AccountSummary(
     string? CryptoSymbol,
     string? CryptoNetwork,
     decimal? CryptoQuantity,
-    decimal? CryptoAvgBuyPriceUsd);
+    decimal? CryptoAvgBuyPriceUsd,
+    Guid? CreditCardId,
+    string? CreditCardIssuer,
+    CreditCardBrand? CreditCardBrand,
+    string? CreditCardProductName,
+    string? CreditCardLastFour,
+    decimal? CreditLimit,
+    decimal? OutstandingBalance,
+    decimal? AvailableCredit,
+    int? StatementClosingDay,
+    int? PaymentDueDay,
+    CreditCardPaymentMode? PaymentMode,
+    string? RewardsProgram,
+    CreditCardStatementDelivery? StatementDelivery,
+    decimal? InterestNominalAnnual,
+    decimal? InterestEffectiveAnnual);

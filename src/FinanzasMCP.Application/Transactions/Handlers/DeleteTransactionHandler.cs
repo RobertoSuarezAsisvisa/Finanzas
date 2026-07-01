@@ -1,12 +1,12 @@
 using FinanzasMCP.Application.Persistence;
+using FinanzasMCP.Application.CreditCards.Services;
 using FinanzasMCP.Application.Transactions.Commands;
-using FinanzasMCP.Domain.Accounts;
 using FinanzasMCP.Domain.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanzasMCP.Application.Transactions.Handlers;
 
-public sealed class DeleteTransactionHandler(IFinanzasMCPDbContext dbContext)
+public sealed class DeleteTransactionHandler(IFinanzasMCPDbContext dbContext, CreditCardTransactionService creditCardTransactionService)
 {
     public async Task Handle(DeleteTransactionCommand command, CancellationToken cancellationToken = default)
     {
@@ -16,7 +16,7 @@ public sealed class DeleteTransactionHandler(IFinanzasMCPDbContext dbContext)
             .Include(x => x.Attachments)
             .FirstAsync(x => x.Id == command.Id, cancellationToken);
 
-        Reverse(transaction);
+        await creditCardTransactionService.ReverseAsync(transaction, cancellationToken);
         foreach (var attachment in transaction.Attachments)
         {
             attachment.SoftDelete();
@@ -25,20 +25,4 @@ public sealed class DeleteTransactionHandler(IFinanzasMCPDbContext dbContext)
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static void Reverse(Transaction transaction)
-    {
-        switch (transaction.Type)
-        {
-            case TransactionType.Income:
-                transaction.Account.Withdraw(transaction.Amount);
-                break;
-            case TransactionType.Expense:
-                transaction.Account.Deposit(transaction.Amount);
-                break;
-            case TransactionType.Transfer:
-                transaction.Account.Deposit(transaction.Amount);
-                transaction.ToAccount?.Withdraw(transaction.Amount);
-                break;
-        }
-    }
 }

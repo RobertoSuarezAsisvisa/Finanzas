@@ -2,4 +2,4 @@ using FinanzasMCP.Domain.Budgets;
 
 namespace FinanzasMCP.Application.Budgets.Commands;
 
-public sealed record CreateBudgetCommand(string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd, Guid? CategoryId = null);
+public sealed record CreateBudgetCommand(string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd);

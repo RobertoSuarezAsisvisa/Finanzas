@@ -3,6 +3,7 @@ using FinanzasMCP.Domain.Accounts;
 using FinanzasMCP.Domain.Budgets;
 using FinanzasMCP.Domain.Categories;
 using FinanzasMCP.Domain.Crypto;
+using FinanzasMCP.Domain.CreditCards;
 using FinanzasMCP.Domain.Debts;
 using FinanzasMCP.Domain.Goals;
 using FinanzasMCP.Domain.Recurring;
@@ -22,7 +23,20 @@ public sealed record CreateAccountRequest(
     string? CryptoSymbol,
     string? CryptoNetwork,
     decimal? CryptoQuantity,
-    decimal? CryptoAvgBuyPriceUsd);
+    decimal? CryptoAvgBuyPriceUsd,
+    string? CreditCardIssuer,
+    CreditCardBrand? CreditCardBrand,
+    string? CreditCardProductName,
+    string? CreditCardLastFour,
+    decimal? CreditLimit,
+    decimal? OutstandingBalance,
+    int? StatementClosingDay,
+    int? PaymentDueDay,
+    CreditCardPaymentMode? PaymentMode,
+    string? RewardsProgram,
+    CreditCardStatementDelivery? StatementDelivery,
+    decimal? InterestNominalAnnual,
+    decimal? InterestEffectiveAnnual);
 
 public sealed record UpdateAccountRequest(
     string Name,
@@ -37,7 +51,23 @@ public sealed record UpdateAccountRequest(
     string? CryptoNetwork,
     decimal? CryptoQuantity,
     decimal? CryptoAvgBuyPriceUsd,
+    string? CreditCardIssuer,
+    CreditCardBrand? CreditCardBrand,
+    string? CreditCardProductName,
+    string? CreditCardLastFour,
+    decimal? CreditLimit,
+    int? StatementClosingDay,
+    int? PaymentDueDay,
+    CreditCardPaymentMode? PaymentMode,
+    string? RewardsProgram,
+    CreditCardStatementDelivery? StatementDelivery,
+    decimal? InterestNominalAnnual,
+    decimal? InterestEffectiveAnnual,
     bool IsActive);
+
+public sealed record CreateCreditCardRequest(string Name, string Currency, string Issuer, CreditCardBrand Brand, decimal CreditLimit, int StatementClosingDay, int PaymentDueDay, string? ProductName, string? LastFour, decimal? OutstandingBalance, CreditCardPaymentMode? PaymentMode, string? RewardsProgram, CreditCardStatementDelivery? StatementDelivery, decimal? InterestNominalAnnual, decimal? InterestEffectiveAnnual);
+public sealed record UpdateCreditCardRequest(string Name, string Currency, string Issuer, CreditCardBrand Brand, decimal CreditLimit, int StatementClosingDay, int PaymentDueDay, string? ProductName, string? LastFour, CreditCardPaymentMode? PaymentMode, string? RewardsProgram, CreditCardStatementDelivery? StatementDelivery, decimal? InterestNominalAnnual, decimal? InterestEffectiveAnnual, bool IsActive);
+public sealed record CloseCreditCardStatementRequest(DateTimeOffset PeriodStart, DateTimeOffset PeriodEnd, DateTimeOffset? StatementDate, DateTimeOffset? DueDate, decimal? MinimumPayment);
 
 public sealed record CreateCategoryRequest(string Name, CategoryType Type, string? Icon, Guid? ParentId, bool IsSystem);
 public sealed record UpdateCategoryRequest(string Name, CategoryType Type, string? Icon, Guid? ParentId);
@@ -57,7 +87,12 @@ public sealed record CreateTransactionRequest(
     string? Reference,
     DateTimeOffset TransactionDate,
     Guid? RecurringRuleId,
-    IReadOnlyList<Guid>? TagIds);
+    IReadOnlyList<Guid>? TagIds,
+    CreditCardOperationType? CreditCardOperationType,
+    Guid? CreditCardStatementId,
+    bool? IsForeignCreditCardTransaction,
+    int? InstallmentCount,
+    string? Merchant);
 
 public sealed record UpdateTransactionRequest(
     TransactionType Type,
@@ -71,9 +106,14 @@ public sealed record UpdateTransactionRequest(
     string? Reference,
     DateTimeOffset TransactionDate,
     Guid? RecurringRuleId,
-    IReadOnlyList<Guid>? TagIds);
+    IReadOnlyList<Guid>? TagIds,
+    CreditCardOperationType? CreditCardOperationType,
+    Guid? CreditCardStatementId,
+    bool? IsForeignCreditCardTransaction,
+    int? InstallmentCount,
+    string? Merchant);
 
-public sealed record CreateBudgetRequest(string Name, Guid? CategoryId, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd);
+public sealed record CreateBudgetRequest(string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd);
 public sealed record UpdateBudgetRequest(string Name, decimal LimitAmount, PeriodType PeriodType, BudgetValidityType ValidityType, DateTimeOffset? PeriodStart, DateTimeOffset? PeriodEnd, bool IsActive);
 
 public sealed record CreateCryptoAccountRequest(Guid AccountId, string Symbol, string? Network, decimal Quantity, decimal? AvgBuyPriceUsd);

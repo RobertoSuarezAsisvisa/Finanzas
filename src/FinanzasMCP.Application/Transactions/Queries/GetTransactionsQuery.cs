@@ -6,6 +6,7 @@ public sealed record GetTransactionsQuery(
     Guid? AccountId = null,
     TransactionType? Type = null,
     Guid? CategoryId = null,
+    Guid? BudgetId = null,
     DateTimeOffset? DateFrom = null,
     DateTimeOffset? DateTo = null,
     string? Search = null,

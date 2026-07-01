@@ -119,6 +119,7 @@ builder.Services
     .AddMcpServer()
     .WithHttpTransport(options => options.Stateless = true)
     .WithTools<AccountTools>()
+    .WithTools<CreditCardTools>()
     .WithTools<CryptoAccountTools>()
     .WithTools<CategoryTools>()
     .WithTools<TagTools>()
